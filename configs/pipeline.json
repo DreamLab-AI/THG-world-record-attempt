@@ -1,10 +1,10 @@
 {
   "campaign_id": "topshop-ss26-look6",
-  "status": "completed",
+  "status": "phase5_in_progress",
   "created_at": "2026-02-25T10:20:00Z",
-  "completed_at": "2026-02-25T10:50:00Z",
+  "completed_at": null,
   "garment": "WLC OUTFITS 02_02_26 3.jpg",
-  "current_phase": 4,
+  "current_phase": 5,
   "phases": {
     "1_base_generation": {
       "status": "completed",
@@ -51,28 +51,8 @@
       "engine": "PIL/Pillow programmatic text overlay (Noto Sans Bold)",
       "started_at": "2026-02-25T10:38:00Z",
       "completed_at": "2026-02-25T10:45:00Z",
-      "note": "Used programmatic text overlay instead of AI-generated text for pixel-perfect accuracy. Gemini Flash Image had consistent misspelling issues with 'REIMAGINED'.",
-      "assets": [
-        "final_shot01_hero_16x9.png",
-        "final_shot01_hero_1x1.png",
-        "final_shot01_hero_9x16.png",
-        "final_shot02_rain_16x9.png",
-        "final_shot02_rain_1x1.png",
-        "final_shot02_rain_9x16.png",
-        "final_shot03_brutalist_16x9.png",
-        "final_shot03_brutalist_1x1.png",
-        "final_shot03_brutalist_9x16.png",
-        "final_shot04_studio_16x9.png",
-        "final_shot04_studio_1x1.png",
-        "final_shot04_studio_9x16.png",
-        "final_shot05_night_16x9.png",
-        "final_shot05_night_1x1.png",
-        "final_shot05_night_9x16.png",
-        "final_shot06_back_16x9.png",
-        "final_shot06_back_1x1.png",
-        "final_shot06_back_9x16.png"
-      ],
-      "count": 18
+      "note": "Used programmatic text overlay instead of AI-generated text for pixel-perfect accuracy.",
+      "assets_count": 18
     },
     "4_animation": {
       "status": "completed",
@@ -81,49 +61,53 @@
       "completed_at": "2026-02-25T10:50:00Z",
       "config": {
         "duration_seconds": 8,
-        "prompt": "Subtle ambient motion: soft shimmer on chrome highlights, gentle rain particles, static text overlay, locked camera, editorial fashion film"
+        "method": "T2V via predictLongRunning"
       },
-      "assets": [
-        "anim_hero_16x9.mp4",
-        "anim_hero_9x16.mp4",
-        "anim_rain_16x9.mp4",
-        "anim_rain_9x16.mp4"
+      "count": 6
+    },
+    "4b_garment_reskinning": {
+      "status": "completed",
+      "engine": "Gemini 2.5 Flash Image (Nano Banana) + PIL compositing",
+      "started_at": "2026-02-25T10:55:00Z",
+      "completed_at": "2026-02-25T11:17:00Z",
+      "method": "Single front panel reference + scene image dual-input to Nano Banana",
+      "count": 24,
+      "breakdown": {
+        "reskinned_images": 6,
+        "composited_with_text": 18
+      }
+    },
+    "5_scene_riffs": {
+      "status": "in_progress",
+      "engine": "Multi-engine: Nano Banana (cloud) + Flux 2 Dev (local GPU)",
+      "started_at": "2026-02-25T11:31:00Z",
+      "input_scenes": [
+        "90CM-CheckWhite-2.jpg (white grid room, smiley balloons)",
+        "freepik neon corridor (dark, vertical neon bars)",
+        "freepik black grid room (Tron-like, neon edges)"
       ],
-      "count": 4
+      "agents": {
+        "scene_cleaner": {"status": "completed", "assets": 3},
+        "direct_composite": {"status": "completed", "assets": 9},
+        "creative_riff": {"status": "completed", "assets": 10},
+        "expanded_riffs": {"status": "in_progress", "target": 15},
+        "flux2_local": {"status": "in_progress", "target": 8}
+      },
+      "completed_count": 22,
+      "target_count": 45
     }
   },
   "metrics": {
-    "total_generated": 34,
-    "total_passed": 34,
-    "total_failed": 0,
-    "total_retries": 2,
-    "breakdown": {
-      "phase1_base_images": 6,
-      "phase2_refined_images": 6,
-      "phase3_composited_images": 18,
-      "phase3_ai_text_attempts": 15,
-      "phase3_programmatic_text_final": 18,
-      "phase4_animated_videos": 4
-    },
-    "output_summary": {
-      "static_images": 24,
-      "animated_videos": 4,
-      "total_deliverables": 28
-    }
-  },
-  "quality_evaluation": {
-    "garment_recognizability": "excellent - botanical ink bodice and diagonal striped skirt clearly visible in all outputs",
-    "chrome_mannequin": "excellent - polished chrome with environment reflections in all shots",
-    "campaign_aesthetic": "excellent - matches Topshop editorial tone: stark, high-contrast, urban, confident",
-    "text_overlay": "pixel-perfect - programmatic overlay ensures correct spelling and consistent typography",
-    "animation_quality": "good - 8-second Veo 3.1 clips with subtle ambient motion",
-    "creative_directions": [
-      "shot01_hero: Wet London brutalist courtyard, overcast dusk",
-      "shot02_rain: Dark rain tunnel with cinematic lighting",
-      "shot03_brutalist: Monumental concrete architecture, minimal palette",
-      "shot04_studio: Clean white background, commercial product shot",
-      "shot05_night: Dramatic spotlight in foggy urban alley",
-      "shot06_back: Open back detail against water-streaked concrete wall"
-    ]
+    "total_generated": 82,
+    "total_target": 105,
+    "phases_1_4_duration_minutes": 30,
+    "reskinning_duration_minutes": 22,
+    "scene_riffs_duration_minutes": 5,
+    "total_wall_clock_minutes": 57,
+    "voice_prompts": 11,
+    "assets_per_minute": 1.6,
+    "peak_parallel_rate": 4.4,
+    "traditional_baseline_hours": 4,
+    "speedup_multiplier": "8-12.6x"
   }
 }
