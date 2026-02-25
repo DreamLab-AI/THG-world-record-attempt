@@ -1,0 +1,74 @@
+[
+  {
+    "id": "shot-01",
+    "name": "Rain Altar",
+    "description": "Chrome mannequin centered on a raised concrete plinth in the middle of a rain-slicked brutalist plaza. The dress catches reflected light from shallow puddles. The mannequin is positioned like a devotional figure -- still, reverent, elevated. Water streams down the concrete walls behind it. The cream fabric appears luminous against the grey monochrome environment, the black botanical ink illustration on the bodice reading like tattooed scripture.",
+    "environment": "Open brutalist plaza with concrete walls and shallow reflecting pools. Ground is wet with standing water. No vegetation. Raw concrete surfaces with water stains and weathering. Urban UK setting, think Barbican Centre or South Bank undercroft.",
+    "lighting": "Overcast flat diffused daylight from above. No direct sun. Ambient reflections from wet surfaces create soft uplight on the dress hem. The cream fabric glows against the grey environment through luminance contrast alone.",
+    "camera_angle": "Low angle, 15 degrees below eye level, shooting slightly upward at the mannequin on the plinth. Creates monumental scale. Full-length garment visible. Wide-angle 24mm perspective with the architecture framing the figure.",
+    "mood": "Sacred geometry meets urban decay. The dress is an artifact displayed in a concrete cathedral. Reverent. Still. The only warmth in a cold world."
+  },
+  {
+    "id": "shot-02",
+    "name": "Chrome Corridor",
+    "description": "The chrome mannequin stands at the far end of a long, narrow corridor of brushed steel panels. The metallic walls create infinite reflections of the dress -- fragments of the botanical print and diagonal stripes repeating and distorting in the polished surfaces. The chain-link straps catch light and visually merge with the chrome environment. The mannequin almost dissolves into its surroundings while the cream fabric grounds it as the only organic element.",
+    "environment": "Narrow industrial corridor with floor-to-ceiling brushed stainless steel panels. Floor is polished concrete. Overhead strip lighting. The corridor recedes to a vanishing point. Think Anish Kapoor installation crossed with a freight elevator interior.",
+    "lighting": "Cold overhead LED strip lighting creating hard downward shadows. The steel panels bounce and scatter the light. Specular highlights on the chrome mannequin surface. The dress fabric is lit by reflected ambient from all the metal surfaces.",
+    "camera_angle": "Straight-on centered shot at eye level. Strong one-point perspective. The corridor lines converge on the mannequin. Medium telephoto 85mm compression to flatten the space and emphasize the tunnel effect.",
+    "mood": "Claustrophobic luxury. The garment is both prisoner and jewel in a metal vault. Cold precision. The botanical print is the only evidence of the natural world."
+  },
+  {
+    "id": "shot-03",
+    "name": "Wet Asphalt Geometry",
+    "description": "Aerial overhead shot looking directly down at the chrome mannequin lying on its back on wet asphalt. The maxi dress fans out in a full circle around the figure, the diagonal stripes creating radiating geometric patterns against the dark wet ground. Puddles reflect fragments of overcast sky. White road markings intersect with the dress silhouette, creating a graphic collision between urban infrastructure and the botanical print.",
+    "environment": "Empty car park or loading dock, wet asphalt surface with painted white lane markings and directional arrows. Rain puddles of varying sizes. No vehicles. Early morning emptiness. UK industrial estate aesthetic.",
+    "lighting": "Flat overcast light from directly above. No shadows since the camera and light source are co-located overhead. The wet asphalt is nearly black and highly reflective. The cream dress fabric is the brightest element by far.",
+    "camera_angle": "Pure top-down 90-degree overhead. Drone or elevated rig perspective. The mannequin and dress create a mandala-like composition against the geometric road markings. Captures the full spread of the A-line skirt.",
+    "mood": "Forensic beauty. The dress laid out for examination like evidence at a crime scene. Stark. Graphic. The botanical illustration becomes a Rorschach test against the urban surface."
+  },
+  {
+    "id": "shot-04",
+    "name": "Glass Fracture",
+    "description": "The chrome mannequin is visible through a shattered plate glass window. Spider-web fractures radiate outward across the glass surface, partially obscuring and refracting the dress behind it. The botanical print on the bodice fragments through the broken glass into abstract shapes. Viewers see the garment as if discovering it through damage -- the beauty behind the break. The chain straps are sharply in focus through a clear section of glass.",
+    "environment": "Empty retail storefront with floor-to-ceiling plate glass. The glass is shattered but still held together by lamination. Interior is minimal -- bare concrete floor, no fixtures. The mannequin stands alone inside. Exterior is an overcast UK high street visible in reflections on the intact portions of glass.",
+    "lighting": "Mixed: soft overcast daylight illuminating the exterior and filtering through the glass. Inside, a single overhead spotlight creates a pool of warm light on the mannequin and dress, making the cream fabric glow against the dark interior.",
+    "camera_angle": "Shot from outside looking in through the broken glass. The camera is at eye level, slightly off-center. Shallow depth of field -- the fracture pattern on the glass is sharp, the dress behind is selectively sharp and soft. 50mm standard lens.",
+    "mood": "Disruption of commerce. Fashion behind broken glass. Beautiful and unsettling. The garment survives whatever happened here. Defiant elegance."
+  },
+  {
+    "id": "shot-05",
+    "name": "Concrete Cascade",
+    "description": "The chrome mannequin is positioned at the top of a monumental brutalist staircase, water cascading down the concrete steps around it. The dress hem floats and trails in the shallow running water. The diagonal stripes of the skirt visually echo the angular geometry of the stair risers. The botanical bodice illustration is captured in tight detail as the camera shoots upward from the base of the stairs.",
+    "environment": "Wide brutalist concrete staircase, minimum 20 steps, with water flowing down in a thin sheet. Raw shuttered concrete texture. Metal handrails. The staircase is exterior, open to overcast sky. Think Trellick Tower or Robin Hood Gardens aesthetic.",
+    "lighting": "Overcast British sky providing flat, even illumination. The running water creates subtle caustic light patterns on the concrete surfaces and the underside of the dress hem. No artificial lighting. Natural cloud-diffused daylight only.",
+    "camera_angle": "Low angle from the base of the stairs looking up. The mannequin is silhouetted against the overcast sky. Strong diagonal composition following the staircase lines. 35mm wide-angle to exaggerate the height and geometric convergence of the steps.",
+    "mood": "Ascension. The garment rises above the brutalist landscape on a waterfall stairway. Monumental. The chrome mannequin is a modern caryatid. Power and grace against raw concrete."
+  },
+  {
+    "id": "shot-06",
+    "name": "Double Exposure District",
+    "description": "Split composition: the left half shows the chrome mannequin in sharp focus against a deep black void. The right half shows a London cityscape (cranes, brutalist towers, wet streets) at dusk, heavily desaturated to near-monochrome. Where the two halves meet, they bleed into each other -- the botanical print on the bodice merges with the architectural silhouettes, as if the ink illustration is a map of the city itself. The diagonal stripes continue the rhythm of the building lines.",
+    "environment": "Left: pure black studio void. Right: London urban skyline at dusk -- construction cranes, the Barbican towers, wet rooftops. The city is desaturated to graphite and silver tones. The transition zone between studio and city is a soft dissolve.",
+    "lighting": "Left side: single hard directional light from upper left creating dramatic shadow on the chrome mannequin. Right side: ambient dusk light with faint warm glow on the horizon line. The contrast between controlled studio light and natural twilight creates visual tension.",
+    "camera_angle": "Frontal, eye-level, perfectly symmetrical split. The mannequin is positioned at the exact center divide. Medium shot from waist up to capture the botanical bodice detail. 85mm portrait lens with composite framing.",
+    "mood": "The garment as urban identity. The woman and the city are one organism. The botanical print is both nature illustration and city blueprint. Duality. Belonging."
+  },
+  {
+    "id": "shot-07",
+    "name": "Mirror Array",
+    "description": "The chrome mannequin stands in the center of a hexagonal arrangement of six large industrial mirrors on a wet concrete floor. Each mirror reflects the dress from a different angle simultaneously -- front, back, both sides, and two three-quarter views. The viewer sees all four reference angles (LOOK 6_1 through 6_4) in a single composed image. The reflections overlap and create kaleidoscopic fragments of the botanical print and diagonal stripes.",
+    "environment": "Empty industrial warehouse space with raw concrete floor and exposed steel beam ceiling. Six freestanding industrial mirrors (2m x 3m each) arranged in a rough hexagonal formation. The floor is wet, adding another layer of downward reflection. Sparse. Minimal. The mirrors are the only objects besides the mannequin.",
+    "lighting": "Single large overhead softbox creating even top-down illumination. The mirrors bounce and redirect the light, creating complex fill from multiple angles. The chrome mannequin catches every reflection. The wet floor adds a lower register of soft reflected light.",
+    "camera_angle": "Elevated 45-degree angle looking down into the mirror array. This angle reveals the reflections in all six mirrors while showing the mannequin from above. Wide-angle 20mm to capture the full installation. The composition is radial and geometric.",
+    "mood": "Surveillance luxury. Total visibility. The garment is examined from every angle simultaneously. Nothing is hidden. The mirrors are both display apparatus and art installation. Obsessive beauty."
+  },
+  {
+    "id": "shot-08",
+    "name": "Night Bus Stop",
+    "description": "The chrome mannequin stands alone at a London bus stop at night. The illuminated bus shelter casts a rectangle of cold fluorescent light around the figure. Rain falls through the light cone. The wet pavement reflects the shelter lights and the cream dress in long vertical streaks. A red double-decker bus is a blur of motion in the background, its lights streaking across the frame. The mannequin is perfectly still -- the only fixed point in a world of urban motion.",
+    "environment": "Authentic London bus stop with TfL-standard shelter. Night setting. Wet pavement. Background shows blurred city lights, rain, the ghost of a passing bus. The shelter advertisement panel is blank white, echoing the cream of the dress. Urban detritus -- a discarded newspaper, wet leaves -- grounds the scene in reality.",
+    "lighting": "Cold fluorescent from the bus shelter overhead panel providing the key light. Warm amber from distant sodium street lamps in the background. The red bus tail lights create a warm streak. Rain is backlit and visible as silver streaks against the dark background. Mixed color temperature creates richness.",
+    "camera_angle": "Eye level, shot from across the street. The bus shelter frames the mannequin like a vitrine. Slight telephoto compression (100mm) flattens the background and makes the bus blur more prominent. The depth of field isolates the mannequin within the shelter.",
+    "mood": "Urban solitude. Fashion as a moment of stillness in the rush of the city. The mannequin waits for a bus that will never come. Cinematic. Lonely glamour. Very Topshop -- high fashion in ordinary places."
+  }
+]

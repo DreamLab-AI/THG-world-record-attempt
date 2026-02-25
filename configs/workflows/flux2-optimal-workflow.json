@@ -1,0 +1,499 @@
+{
+  "_comment": "Flux 2 Dev Optimal Text-to-Image Workflow - Adapted for dual RTX 6000 Ada (48GB each). Based on official Comfy-Org workflow template. Uses SamplerCustomAdvanced pipeline with euler sampler, FluxGuidance=4, 20 steps (or 8 with Turbo LoRA).",
+  "last_node_id": 50,
+  "last_link_id": 60,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [-900, 0],
+      "size": [300, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [1, 20]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "flux2_dev_fp8mixed.safetensors",
+        "default"
+      ],
+      "title": "Load Diffusion Model (GPU 0)"
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [-900, 140],
+      "size": [300, 106],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [2]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "mistral_3_small_flux2_fp8.safetensors",
+        "flux2",
+        "default"
+      ],
+      "title": "Load Mistral Text Encoder"
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [-900, 310],
+      "size": [300, 60],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [3]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "flux2-vae.safetensors"
+      ],
+      "title": "Load Flux 2 VAE"
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [-540, 0],
+      "size": [420, 180],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [5]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "A fashion model wearing an elegant white linen blazer with structured shoulders, standing against a seamless dove-gray studio backdrop. Soft directional lighting from the upper left creates gentle shadows. The blazer has a single brass button. Professional fashion photography, editorial style, high detail fabric texture."
+      ],
+      "title": "Prompt",
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 6,
+      "type": "FluxGuidance",
+      "pos": [-540, 240],
+      "size": [320, 58],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [6]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FluxGuidance"
+      },
+      "widgets_values": [
+        4.0
+      ],
+      "title": "Flux Guidance (4.0 = balanced realism)",
+      "color": "#233",
+      "bgcolor": "#355",
+      "_comment": "FluxGuidance replaces CFG for Flux 2. Values: 2.0=very realistic, 4.0=balanced, 6.0=more stylized, 8.0+=heavy guidance. Start at 4.0 for fashion photography."
+    },
+    {
+      "id": 7,
+      "type": "BasicGuider",
+      "pos": [0, 0],
+      "size": [220, 46],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        },
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "name": "GUIDER",
+          "type": "GUIDER",
+          "links": [7]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "BasicGuider"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 8,
+      "type": "RandomNoise",
+      "pos": [0, 100],
+      "size": [220, 82],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "NOISE",
+          "type": "NOISE",
+          "links": [8]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "RandomNoise"
+      },
+      "widgets_values": [
+        42,
+        "randomize"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "KSamplerSelect",
+      "pos": [0, 240],
+      "size": [220, 58],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SAMPLER",
+          "type": "SAMPLER",
+          "links": [9]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSamplerSelect"
+      },
+      "widgets_values": [
+        "euler"
+      ],
+      "_comment": "euler is the recommended sampler for Flux 2. dpmpp_2m also works well."
+    },
+    {
+      "id": 10,
+      "type": "Flux2Scheduler",
+      "pos": [0, 360],
+      "size": [220, 106],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [10]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Flux2Scheduler"
+      },
+      "widgets_values": [
+        20,
+        1248,
+        832
+      ],
+      "_comment": "steps=20 for quality, 8 for speed with Turbo LoRA. Dimensions: 1248x832 (landscape ~1MP), 832x1248 (portrait), 1024x1024 (square). Flux 2 targets 1-4 megapixels."
+    },
+    {
+      "id": 11,
+      "type": "EmptyFlux2LatentImage",
+      "pos": [0, 530],
+      "size": [270, 106],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [11]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "EmptyFlux2LatentImage"
+      },
+      "widgets_values": [
+        1248,
+        832,
+        1
+      ],
+      "_comment": "Match dimensions to Flux2Scheduler. batch_size=1 for single image, increase for batches."
+    },
+    {
+      "id": 12,
+      "type": "SamplerCustomAdvanced",
+      "pos": [300, 0],
+      "size": [270, 124],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "noise",
+          "type": "NOISE",
+          "link": 8
+        },
+        {
+          "name": "guider",
+          "type": "GUIDER",
+          "link": 7
+        },
+        {
+          "name": "sampler",
+          "type": "SAMPLER",
+          "link": 9
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": 10
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [12]
+        },
+        {
+          "name": "denoised_output",
+          "type": "LATENT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SamplerCustomAdvanced"
+      },
+      "widgets_values": [],
+      "_comment": "This replaces KSampler for Flux 2. CFG is not used here -- guidance is controlled by FluxGuidance node."
+    },
+    {
+      "id": 13,
+      "type": "VAEDecode",
+      "pos": [630, 0],
+      "size": [210, 46],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 12
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [13]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecode"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "SaveImage",
+      "pos": [900, 0],
+      "size": [470, 470],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 13
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "Flux2_Campaign"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "LoraLoaderModelOnly",
+      "pos": [-540, 440],
+      "size": [300, 82],
+      "flags": {},
+      "order": 13,
+      "mode": 4,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "Flux2TurboComfyv2.safetensors",
+        1.0
+      ],
+      "title": "Turbo LoRA (BYPASSED - enable for 8-step mode)",
+      "_comment": "When enabled, reduces steps from 20 to 8. Set mode=0 to enable, mode=4 to bypass. Connect output to BasicGuider model input instead of UNETLoader direct."
+    }
+  ],
+  "links": [
+    [1, 1, 0, 7, 0, "MODEL"],
+    [2, 2, 0, 5, 0, "CLIP"],
+    [3, 3, 0, 13, 1, "VAE"],
+    [5, 5, 0, 6, 0, "CONDITIONING"],
+    [6, 6, 0, 7, 1, "CONDITIONING"],
+    [7, 7, 0, 12, 1, "GUIDER"],
+    [8, 8, 0, 12, 0, "NOISE"],
+    [9, 9, 0, 12, 2, "SAMPLER"],
+    [10, 10, 0, 12, 3, "SIGMAS"],
+    [11, 11, 0, 12, 4, "LATENT"],
+    [12, 12, 0, 13, 0, "LATENT"],
+    [13, 13, 0, 14, 0, "IMAGE"],
+    [20, 1, 0, 20, 0, "MODEL"]
+  ],
+  "groups": [
+    {
+      "title": "Model Loaders",
+      "bounding": [-920, -80, 340, 470],
+      "color": "#3f789e"
+    },
+    {
+      "title": "Prompt & Guidance",
+      "bounding": [-560, -80, 460, 400],
+      "color": "#3f789e"
+    },
+    {
+      "title": "Sampling Pipeline",
+      "bounding": [-20, -80, 600, 750],
+      "color": "#3f789e"
+    },
+    {
+      "title": "Output",
+      "bounding": [610, -80, 780, 580],
+      "color": "#3f789e"
+    }
+  ],
+  "config": {},
+  "extra": {
+    "manual_config": {
+      "model_paths": {
+        "diffusion_models": "flux2_dev_fp8mixed.safetensors",
+        "text_encoders": "mistral_3_small_flux2_fp8.safetensors",
+        "vae": "flux2-vae.safetensors",
+        "loras": "Flux2TurboComfyv2.safetensors"
+      },
+      "recommended_settings": {
+        "quality_mode": {
+          "steps": 20,
+          "sampler": "euler",
+          "flux_guidance": 4.0,
+          "description": "Best quality, ~12s on RTX 6000 Ada"
+        },
+        "turbo_mode": {
+          "steps": 8,
+          "sampler": "euler",
+          "flux_guidance": 4.0,
+          "lora": "Flux2TurboComfyv2.safetensors",
+          "lora_strength": 1.0,
+          "description": "Fast generation, ~5s on RTX 6000 Ada"
+        },
+        "dimensions": {
+          "landscape_3_2": [1248, 832],
+          "portrait_2_3": [832, 1248],
+          "square_1_1": [1024, 1024],
+          "wide_16_9": [1360, 768],
+          "tall_9_16": [768, 1360],
+          "large_landscape": [1536, 1024],
+          "large_portrait": [1024, 1536]
+        },
+        "guidance_values": {
+          "photorealistic": 2.0,
+          "balanced": 4.0,
+          "stylized": 6.0,
+          "strong_guidance": 8.0
+        }
+      }
+    }
+  },
+  "version": 0.4
+}

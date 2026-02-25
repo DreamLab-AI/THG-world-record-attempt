@@ -1,0 +1,36 @@
+{
+  "campaign": "Topshop SS26 - Style Reimagined",
+  "garment_description": "Cream sleeveless maxi dress with black botanical ink illustration bodice featuring chrysanthemum, birds and floral line art, diagonal black striped A-line skirt, delicate chain link straps, open back, fitted waist",
+  "prompts": [
+    {
+      "id": "shot_01_hero_editorial",
+      "seed": 42,
+      "prompt": "High fashion editorial photograph for Topshop campaign, chrome mannequin wearing a cream sleeveless maxi dress with intricate black botanical ink illustration bodice featuring chrysanthemum flowers and birds, diagonal black striped A-line skirt, delicate chain straps. Standing on wet London street at dusk, reflections on asphalt, brutalist concrete building backdrop, overcast diffused lighting, stark high-contrast, sharp editorial photography, professional studio quality, 85mm lens, shallow depth of field"
+    },
+    {
+      "id": "shot_02_urban_rain",
+      "seed": 1337,
+      "prompt": "Dramatic fashion campaign photograph, polished chrome mannequin figure wearing cream maxi dress with black ink botanical floral bodice illustration and diagonal striped skirt, chain link straps. Standing in rain on reflective urban pavement, neon reflections in puddles, dark moody atmosphere, wet concrete walls, cinematic lighting from street lamps, high fashion editorial Topshop aesthetic, hyper-realistic, shot on medium format camera, dramatic shadows"
+    },
+    {
+      "id": "shot_03_brutalist_architecture",
+      "seed": 2024,
+      "prompt": "Architectural fashion editorial, sleek chrome mannequin displaying cream sleeveless maxi dress with black botanical ink art bodice showing chrysanthemum and bird motifs, diagonal striped A-line skirt, chain straps. Positioned against raw brutalist concrete architecture, geometric shadows, overcast sky, minimalist composition, stark contrast between organic dress pattern and hard architectural lines, high-end fashion photography, magazine cover quality"
+    },
+    {
+      "id": "shot_04_studio_stark",
+      "seed": 7890,
+      "prompt": "Clean studio fashion photograph on pure white background, highly reflective chrome mannequin wearing cream sleeveless maxi dress with elaborate black botanical ink illustration on bodice including chrysanthemum flowers birds and floral line art, diagonal black striped A-line skirt flowing to floor, thin chain link shoulder straps, fitted waist. Product photography lighting, crisp detail on fabric texture and print, commercial campaign shot for Topshop SS26 collection, ultra sharp focus"
+    },
+    {
+      "id": "shot_05_night_editorial",
+      "seed": 5555,
+      "prompt": "Night fashion editorial photograph, luminous chrome mannequin wearing cream floor-length sleeveless maxi dress with black botanical illustration bodice and diagonal striped skirt, chain straps catching light. Dark urban alley background with atmospheric fog, single dramatic spotlight creating stark shadows, wet ground reflections, moody cinematic color grading, Topshop campaign aesthetic, fashion film still quality, 50mm prime lens"
+    },
+    {
+      "id": "shot_06_back_view",
+      "seed": 9999,
+      "prompt": "Rear view fashion editorial photograph, chrome mannequin showing open back detail of cream sleeveless maxi dress with black botanical ink bodice visible at sides, diagonal striped A-line skirt, delicate chain link straps crossing the exposed back. Standing before massive brutalist concrete wall with water streaming down surface, moody overcast lighting, urban London environment, high fashion Topshop campaign photography, architectural framing, dramatic scale contrast"
+    }
+  ]
+}

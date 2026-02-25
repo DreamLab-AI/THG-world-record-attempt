@@ -1,0 +1,111 @@
+{
+  "research_source": "Web search aggregation (1000logos.net, Typewolf, Google Fonts, FontFabric, dafont forums)",
+  "research_date": "2026-02-25",
+  "note": "Perplexity API returned 401 (Cloudflare proxy block). Research conducted via web search and direct source analysis.",
+
+  "topshop_logo_analysis": {
+    "typeface_classification": "Heavy geometric sans-serif",
+    "identified_closest_fonts": [
+      "Neue Singular H Bold",
+      "Neue Helvetica eText Pro 75 Bold"
+    ],
+    "letterform_characteristics": {
+      "weight": "Bold / Heavy",
+      "case": "All uppercase",
+      "spacing": "Wide letter-spacing (tracked out)",
+      "geometry": "Clean geometric with strict cuts and distinctive contours",
+      "terminals": "Square terminals (post-1996 redesign)",
+      "special_features": "Rounded lines combined with straight cuts, prominent circular O forms",
+      "overall_impression": "Minimalist, architectural, high-fashion editorial"
+    },
+    "logo_evolution": {
+      "1964_1996": "Stacked vertical wordmark with decorative strokes, unusual H middle bar",
+      "1996": "Rounded terminals replaced by square cuts, decorative strokes removed",
+      "1997_2005": "First single-line composition, additional glyph spacing, lighter weight, prominent circular Os",
+      "2005_2018": "Further refinement, lighter weight, more proportional letterforms",
+      "2018_present": "Minimalist black-and-white, timeless geometric sans-serif, suitable for tags, packaging, digital"
+    }
+  },
+
+  "google_fonts_candidates": {
+    "tier_1_best_match": [
+      {
+        "font": "Jost",
+        "url": "https://fonts.google.com/specimen/Jost",
+        "weights": ["400", "500", "600", "700", "800", "900"],
+        "why": "Inspired by 1920s German geometric sans-serifs (Paul Renner / Futura lineage). Clean Bauhaus geometry with wide letter-spacing support. Circular O, strict geometric construction. Best overall match for Topshop's modern geometric identity.",
+        "match_score": 0.92
+      },
+      {
+        "font": "Archivo",
+        "url": "https://fonts.google.com/specimen/Archivo",
+        "weights": ["400", "500", "600", "700", "800", "900"],
+        "why": "Grotesque sans-serif designed for digital high-performance. Strong geometric bones with slightly humanist terminals. Excellent in all-caps display at large sizes. Very close to Neue Helvetica proportions.",
+        "match_score": 0.88
+      }
+    ],
+    "tier_2_strong_alternatives": [
+      {
+        "font": "Montserrat",
+        "url": "https://fonts.google.com/specimen/Montserrat",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "why": "Geometric sans inspired by Buenos Aires signage. Wide weight range. Strong uppercase display presence. Already in existing brand config as a candidate.",
+        "match_score": 0.85
+      },
+      {
+        "font": "Work Sans",
+        "url": "https://fonts.google.com/specimen/Work+Sans",
+        "weights": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+        "why": "Closest in design impression to Helvetica Neue for display/heading use. Optimized for screen. Clean geometry with subtle humanist warmth.",
+        "match_score": 0.83
+      },
+      {
+        "font": "IBM Plex Sans",
+        "url": "https://fonts.google.com/specimen/IBM+Plex+Sans",
+        "weights": ["100", "200", "300", "400", "500", "600", "700"],
+        "why": "Hybrid geometric-grotesque. Very close to Neue Helvetica in proportions and stroke contrast. Corporate precision that reads as high-end.",
+        "match_score": 0.82
+      }
+    ],
+    "tier_3_display_condensed": [
+      {
+        "font": "Bebas Neue",
+        "url": "https://fonts.google.com/specimen/Bebas+Neue",
+        "weights": ["400"],
+        "why": "Tall condensed sans-serif. Striking in all-caps display. More editorial/poster feel than the Topshop wordmark, but excellent for campaign headlines and overlays.",
+        "match_score": 0.78
+      },
+      {
+        "font": "Oswald",
+        "url": "https://fonts.google.com/specimen/Oswald",
+        "weights": ["200", "300", "400", "500", "600", "700"],
+        "why": "Alternate Gothic style condensed. Strong headline impact. Good for campaign taglines where vertical compression is desired.",
+        "match_score": 0.72
+      }
+    ]
+  },
+
+  "recommended_campaign_typography_system": {
+    "primary_headline": {
+      "font": "Jost",
+      "weight": "700",
+      "case": "uppercase",
+      "letter_spacing": "0.15em",
+      "rationale": "Closest geometric match to Topshop wordmark. Wide tracking mirrors the brand's tracked-out identity. Bauhaus heritage aligns with Topshop's modernist editorial DNA."
+    },
+    "secondary_headline": {
+      "font": "Bebas Neue",
+      "weight": "400",
+      "case": "uppercase",
+      "letter_spacing": "0.05em",
+      "rationale": "Condensed display for high-impact campaign taglines. Creates visual contrast with the primary headline without breaking geometric consistency."
+    },
+    "body_support": {
+      "font": "Work Sans",
+      "weight": "400",
+      "case": "sentence case",
+      "letter_spacing": "0.02em",
+      "rationale": "Clean Helvetica-adjacent reading font for any body copy or small print overlays."
+    }
+  }
+}

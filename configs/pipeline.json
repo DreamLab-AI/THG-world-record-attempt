@@ -1,0 +1,73 @@
+{
+  "campaign_id": "topshop-ss26-look6",
+  "status": "completed",
+  "created_at": "2026-02-25T10:20:00Z",
+  "completed_at": "2026-02-25T10:51:00Z",
+  "garment": "WLC OUTFITS 02_02_26 3.jpg",
+  "current_phase": 4,
+  "phases": {
+    "1_base_generation": {
+      "status": "completed",
+      "started_at": "2026-02-25T10:26:00Z",
+      "completed_at": "2026-02-25T10:32:00Z",
+      "engine": "flux2_dev_fp8mixed (ComfyUI)",
+      "assets": [
+        "campaign_shot01_hero_00001_.png",
+        "campaign_shot02_rain_00001_.png",
+        "campaign_shot03_brutalist_00001_.png",
+        "campaign_shot04_studio_00001_.png",
+        "campaign_shot05_night_00001_.png",
+        "campaign_shot06_back_00001_.png"
+      ]
+    },
+    "2_style_refinement": {
+      "status": "completed",
+      "started_at": "2026-02-25T10:32:00Z",
+      "completed_at": "2026-02-25T10:38:00Z",
+      "engine": "gemini-2.5-flash-image (Nano Banana)",
+      "assets": [
+        "refined_shot01_hero.png",
+        "refined_shot02_rain.png",
+        "refined_shot03_brutalist.png",
+        "refined_shot04_studio.png",
+        "refined_shot05_night.png",
+        "refined_shot06_back.png"
+      ]
+    },
+    "3_static_compositing": {
+      "status": "completed",
+      "started_at": "2026-02-25T10:38:00Z",
+      "completed_at": "2026-02-25T10:45:00Z",
+      "engine": "programmatic (Pillow/ImageMagick)",
+      "assets": [
+        "final_shot01_hero_16x9.png", "final_shot01_hero_1x1.png", "final_shot01_hero_9x16.png",
+        "final_shot02_rain_16x9.png", "final_shot02_rain_1x1.png", "final_shot02_rain_9x16.png",
+        "final_shot03_brutalist_16x9.png", "final_shot03_brutalist_1x1.png", "final_shot03_brutalist_9x16.png",
+        "final_shot04_studio_16x9.png", "final_shot04_studio_1x1.png", "final_shot04_studio_9x16.png",
+        "final_shot05_night_16x9.png", "final_shot05_night_1x1.png", "final_shot05_night_9x16.png",
+        "final_shot06_back_16x9.png", "final_shot06_back_1x1.png", "final_shot06_back_9x16.png"
+      ]
+    },
+    "4_animation": {
+      "status": "completed",
+      "started_at": "2026-02-25T10:45:00Z",
+      "completed_at": "2026-02-25T10:51:00Z",
+      "engine": "veo-3.1-generate-preview",
+      "assets": [
+        "anim_hero_16x9.mp4",
+        "anim_hero_9x16.mp4",
+        "anim_rain_16x9.mp4",
+        "anim_rain_9x16.mp4",
+        "anim_brutalist_9x16.mp4",
+        "anim_night_9x16.mp4"
+      ]
+    }
+  },
+  "metrics": {
+    "total_generated": 36,
+    "total_passed": 36,
+    "total_failed": 0,
+    "total_retries": 9,
+    "pass_rate": 1.0
+  }
+}

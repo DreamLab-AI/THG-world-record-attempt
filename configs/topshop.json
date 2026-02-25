@@ -1,0 +1,130 @@
+{
+  "brand": "Topshop",
+  "campaign": "SS26 - Style Reimagined",
+  "garment": {
+    "id": "look-6",
+    "file": "WLC OUTFITS 02_02_26 3.jpg",
+    "type": "Sleeveless maxi dress",
+    "description": "Cream/beige sleeveless maxi dress with black botanical ink illustration bodice (chrysanthemum, birds, floral line art), diagonal black striped A-line skirt, chain link straps, open back, fitted waist",
+    "panels": {
+      "front": "LOOK 6_1",
+      "right_side": "LOOK 6_2",
+      "back": "LOOK 6_3",
+      "left_side": "LOOK 6_4"
+    },
+    "hero_angle": "LOOK 6_1"
+  },
+  "identity": {
+    "palette": {
+      "primary": ["#000000", "#FFFFFF", "#808080"],
+      "accent": ["#C0C0C0", "#D4D4D4"],
+      "material": "chrome, polished metal, high-sheen reflective"
+    },
+    "typography": {
+      "style": "geometric sans-serif",
+      "reference_fonts": ["Neue Singular H Bold", "Neue Helvetica eText Pro 75 Bold"],
+      "google_fonts_candidates": {
+        "primary_headline": {
+          "font": "Jost",
+          "weight": "700",
+          "fallback": "Montserrat",
+          "rationale": "Closest geometric match to Topshop wordmark. 1920s German sans-serif heritage (Futura lineage). Clean Bauhaus geometry with wide tracking support."
+        },
+        "secondary_headline": {
+          "font": "Bebas Neue",
+          "weight": "400",
+          "fallback": "Oswald",
+          "rationale": "Condensed display for campaign taglines. High vertical impact for poster and banner formats."
+        },
+        "body": {
+          "font": "Work Sans",
+          "weight": "400",
+          "fallback": "IBM Plex Sans",
+          "rationale": "Closest impression to Helvetica Neue for supporting copy. Clean digital readability."
+        }
+      },
+      "all_candidates_ranked": [
+        {"font": "Jost", "source": "google_fonts", "match_score": 0.92},
+        {"font": "Archivo", "source": "google_fonts", "match_score": 0.88},
+        {"font": "Montserrat", "source": "google_fonts", "match_score": 0.85},
+        {"font": "Work Sans", "source": "google_fonts", "match_score": 0.83},
+        {"font": "IBM Plex Sans", "source": "google_fonts", "match_score": 0.82},
+        {"font": "Bebas Neue", "source": "google_fonts", "match_score": 0.78},
+        {"font": "Oswald", "source": "google_fonts", "match_score": 0.72}
+      ],
+      "case": "uppercase",
+      "letter_spacing": "0.15em",
+      "color": "#FFFFFF"
+    },
+    "tone": {
+      "aesthetic": "stark high-contrast, editorial, urban",
+      "mood": "confident, modern, architectural",
+      "environment": "wet UK city streets, brutalist concrete, urban metal structures, overcast diffused lighting"
+    },
+    "headlines": [
+      "STYLE REIMAGINED",
+      "NEW COLLECTION",
+      "TOPSHOP SS26"
+    ]
+  },
+  "output_formats": {
+    "static": {
+      "landscape_16_9": {"width": 1920, "height": 1080},
+      "square_1_1": {"width": 1080, "height": 1080},
+      "portrait_9_16": {"width": 1080, "height": 1920}
+    },
+    "animated": {
+      "landscape_16_9": {"width": 1920, "height": 1080, "duration_seconds": 8},
+      "square_1_1": {"width": 1080, "height": 1080, "duration_seconds": 8},
+      "portrait_9_16": {"width": 1080, "height": 1920, "duration_seconds": 8}
+    }
+  },
+  "targets": {
+    "static_variations": 24,
+    "animated_variations": 8,
+    "min_pass_rate": 0.7,
+    "max_retries_per_asset": 3
+  },
+  "engines": {
+    "comfyui": {
+      "url": "http://comfyui:8188",
+      "salad_api": "http://comfyui:3000",
+      "models": {
+        "unet": "flux2_dev_fp8mixed.safetensors",
+        "text_encoder": "mistral_3_small_flux2_fp8.safetensors",
+        "vae": "flux2-vae.safetensors",
+        "lora_turbo": "Flux2TurboComfyv2.safetensors"
+      },
+      "input_path": "/root/ComfyUI/input/",
+      "output_path": "/root/ComfyUI/output/"
+    },
+    "nano_banana": {
+      "model": "gemini-2.5-flash-image",
+      "model_pro": "gemini-3-pro-image-preview",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+    },
+    "imagen4": {
+      "model": "imagen-4.0-ultra-generate-001",
+      "model_fast": "imagen-4.0-fast-generate-001",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+    },
+    "veo": {
+      "model": "veo-3.1-generate-preview",
+      "model_fast": "veo-3.1-fast-generate-preview",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models"
+    },
+    "perplexity": {
+      "model": "sonar",
+      "endpoint": "https://api.perplexity.ai/chat/completions"
+    }
+  },
+  "container_access": {
+    "docker_exec": "docker exec comfyui",
+    "tmux_host_tab": "workspace:7",
+    "garment_container_path": "/root/ComfyUI/input/WLC OUTFITS 02_02_26 3.jpg",
+    "model_download_authorized": true,
+    "python_debug_authorized": true,
+    "custom_node_install_authorized": true,
+    "venv_creation_authorized": true
+  }
+}
