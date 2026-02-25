@@ -237,27 +237,31 @@ def poll_veo_job(operation_name, max_wait=600, poll_interval=15):
                     print(f"    Job failed: {err.get('message', str(err))}")
                     return None
 
-                # Extract video URI from response
+                # Log response structure for debugging
                 response_data = data.get("response", {})
+                print(f"    Response keys: {list(response_data.keys())}")
+
+                # Extract video URI from response -- try multiple structures
                 videos = response_data.get("generateVideoResponse", {}).get("generatedSamples", [])
                 if not videos:
-                    # Try alternate response structures
                     videos = response_data.get("generatedSamples", [])
                 if not videos:
-                    # Try predictions structure
                     predictions = response_data.get("predictions", [])
                     if predictions:
                         video_uri = predictions[0].get("videoUri", "") or predictions[0].get("video", {}).get("uri", "")
                         if video_uri:
+                            print(f"    Video URI: {video_uri[:120]}...")
                             return video_uri
 
                 if videos:
                     video = videos[0]
+                    print(f"    Sample keys: {list(video.keys())}")
                     video_uri = video.get("video", {}).get("uri", "") or video.get("videoUri", "")
                     if video_uri:
+                        print(f"    Video URI: {video_uri[:120]}...")
                         return video_uri
 
-                print(f"    Job done but no video URI found. Response: {json.dumps(data)[:500]}")
+                print(f"    Job done but no video URI found. Full response: {json.dumps(data)[:800]}")
                 return None
 
             # Not done yet
@@ -274,14 +278,33 @@ def poll_veo_job(operation_name, max_wait=600, poll_interval=15):
 
 
 def download_video(uri, output_path):
-    """Download video from URI using curl."""
+    """Download video from URI. Appends API key if it's a Google API URL."""
+    # If the URI is a Google API endpoint, append the API key
+    download_url = uri
+    if "googleapis.com" in uri:
+        separator = "&" if "?" in uri else "?"
+        download_url = f"{uri}{separator}key={API_KEY}"
+
     try:
         result = subprocess.run(
-            ["curl", "-L", "-s", "-o", output_path, uri],
+            ["curl", "-L", "-s", "-o", output_path, download_url],
             capture_output=True, text=True, timeout=120
         )
         if result.returncode == 0 and os.path.exists(output_path):
-            size_kb = os.path.getsize(output_path) // 1024
+            size_bytes = os.path.getsize(output_path)
+            # Check if the download is actually a video (> 10KB) or an error response
+            if size_bytes < 10000:
+                # Likely an error, check content
+                try:
+                    with open(output_path, "r") as f:
+                        content = f.read(2000)
+                    if content.strip().startswith("{") and "error" in content:
+                        print(f"    Download returned error: {content[:300]}")
+                        os.remove(output_path)
+                        return False
+                except Exception:
+                    pass
+            size_kb = size_bytes // 1024
             print(f"    Downloaded: {output_path} ({size_kb}KB)")
             return True
         else:
@@ -319,30 +342,31 @@ def add_branding(input_path, output_path):
     y_offset_1 = int(height * 0.88)
     y_offset_2 = y_offset_1 + font_size_1 + int(font_size_1 * 0.4)
 
-    # Build ffmpeg drawtext filter -- two lines
+    # Build ffmpeg drawtext filter -- two lines, escaping colons in text with \\:
+    text1_escaped = BRAND_TEXT_LINE1.replace(":", "\\:")
+    text2_escaped = BRAND_TEXT_LINE2.replace(":", "\\:")
+
     filter_str = (
-        f"drawtext=text='{BRAND_TEXT_LINE1}':"
-        f"fontfile={FONT_PATH}:"
+        f"drawtext=text='{text1_escaped}':"
+        f"fontfile='{FONT_PATH}':"
         f"fontsize={font_size_1}:"
         f"fontcolor=white:"
         f"borderw={border_w}:"
         f"bordercolor=black@0.5:"
         f"x=(w-text_w)/2:"
         f"y={y_offset_1}:"
-        f"enable='between(t,1,7.5)',"
-        f"drawtext=text='{BRAND_TEXT_LINE2}':"
-        f"fontfile={FONT_PATH}:"
+        f"enable='between(t\\,1\\,7.5)',"
+        f"drawtext=text='{text2_escaped}':"
+        f"fontfile='{FONT_PATH}':"
         f"fontsize={font_size_2}:"
         f"fontcolor=white@0.85:"
         f"borderw={border_w}:"
         f"bordercolor=black@0.4:"
         f"x=(w-text_w)/2:"
         f"y={y_offset_2}:"
-        f"enable='between(t,1,7.5)'"
+        f"enable='between(t\\,1\\,7.5)'"
     )
 
-    # Add fade-in/fade-out for the text using a more refined approach
-    # We use alpha-based enable timing for elegant text appearance
     cmd = [
         "ffmpeg", "-y",
         "-i", input_path,
@@ -395,10 +419,26 @@ def main():
         raw_path = os.path.join(OUT_DIR, video["output_raw"])
         branded_path = os.path.join(OUT_DIR, video["output_branded"])
 
-        # Step 1: Submit job
-        op_name = submit_veo_job(video["prompt"], video["aspect_ratio"])
+        # Resume support: skip if branded file already exists and is valid
+        if os.path.exists(branded_path) and os.path.getsize(branded_path) > 50000:
+            size_mb = os.path.getsize(branded_path) / (1024 * 1024)
+            print(f"  SKIP: Already exists ({size_mb:.1f}MB)")
+            results[video["id"]] = "already_exists"
+            continue
+
+        # Step 1: Submit job with rate-limit retry
+        op_name = None
+        for attempt in range(1, 4):
+            op_name = submit_veo_job(video["prompt"], video["aspect_ratio"])
+            if op_name:
+                break
+            # If rate limited, wait and retry
+            wait_time = 60 * attempt
+            print(f"  Retrying in {wait_time}s (attempt {attempt}/3)...")
+            time.sleep(wait_time)
+
         if not op_name:
-            print(f"  FAILED: Could not submit job")
+            print(f"  FAILED: Could not submit job after retries")
             results[video["id"]] = "submit_failed"
             continue
 
@@ -436,8 +476,8 @@ def main():
 
         # Pause between API calls
         if i < len(VIDEOS):
-            print("  Waiting 5s before next submission...")
-            time.sleep(5)
+            print("  Waiting 10s before next submission...")
+            time.sleep(10)
 
     # Summary
     print("\n" + "=" * 70)
