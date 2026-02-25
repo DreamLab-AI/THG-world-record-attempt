@@ -90,6 +90,31 @@ All creative direction was provided as natural language voice prompts. The AI sw
 
 **Result:** IRIS PDF research agent read 6 appendix documents, extracting full system context (IRIS = Intelligent Real-time Integrated Studio, DreamLab AI, UKRI Agentic AI Pioneers Prize, TRL 4→6 progression). 3 parallel repose agents produced 28/28 mannequin images with 100% success rate. Report updated with IRIS context and Task Two section. New ComfyUI workflow created (nano-banana-repose.json).
 
+### Prompt 17: IRIS Screenshots and Full QA Pass
+> *"i added some screenshots from the IRIS web interface into the figures directory on github, pull and integrate into the report. Ensure the report is fully up to date and use your agentic QE fleet for QA checking for UK spelling. ensure citations and references and breadcrumbs to back any assertions using your perplexity skill. download thg ingenuity and topshop and dreamlab-ai branding from the web and integrate into the pdf. use a claude flow v3 swarm"*
+
+**Result:** 4-agent parallel swarm launched: citations researcher (26 claims verified across 40+ sources, 88% fully verified), brand asset downloader (Topshop + THG + DreamLab logos), QE UK spelling reviewer (21 issues found including behaviour/centre/totalling), screenshot monitor. 4 IRIS/VisionFlow screenshots integrated into report. Full bibliography with 20 references added. British English enforced throughout.
+
+### Prompt 18: Agentic Workflow Clarification
+> *"have we been clear that all workflows were generated from scratch agentically and without any creative interface?"*
+
+**Result:** Report strengthened in 4 key locations: executive summary, Agentic Catwalk comparison, voice-first methodology, and conclusion. Now explicitly states the human never opened ComfyUI, Freepik Spaces, Photoshop, or any creative application. All workflow JSON files were written by the AI agents.
+
+### Prompt 19: DeepSeek Critique and Wrap-Up
+> *"have deepseek agent critique the report please. make improving changes only if they make sense. add in all these prompts and we'll wrap at the 4 hour mark"*
+
+**Result:** DeepSeek critique agent deployed with 21 specific findings across 6 categories. Sensible improvements applied: numerical consistency (133 canonical throughout), proper Nano Banana definition, corrected IP sovereignty claim, limitations section added, traditional baseline caveats, full bibliography integrated.
+
+### Prompt 20: Branded Video Generation
+> *"also make some branded veo videos of the highest quality images please"*
+
+**Result:** Veo 3.1 video generation agents deployed targeting the highest-quality scene riff and repose images with Topshop SS26 branding.
+
+### Prompt 21: Final Push
+> *"update the readme and push when done"*
+
+**Result:** README updated with all 21 voice prompts, corrected metrics, event details, and limitations section. Final compilation and push.
+
 ---
 
 ## Timestamp Analysis
@@ -244,13 +269,14 @@ In approximately 57 minutes of wall-clock time (with 11 voice prompts):
 
 | Metric | Value |
 |--------|-------|
-| Total voice prompts | 16 |
-| Total assets generated | 133+ |
-| Assets per prompt | 8.3 |
+| Total voice prompts | 21 (16 generation, 5 documentation/QA) |
+| Total assets generated | 133 |
+| Assets per generation prompt | 8.3 |
 | Average prompt length | ~2 sentences |
 | Longest prompt (Prompt 16: IRIS + Repose) | 6 sentences |
 | Total human input time | ~5 minutes of speaking |
-| Total autonomous execution time | ~64 minutes |
-| Human:Machine time ratio | 1:13 |
+| Total wall-clock time (first config to last asset) | ~96 minutes |
+| Active generation time | ~64 minutes |
+| Human:Machine time ratio | 1:19 |
 
-The operator provided approximately 5 minutes of creative direction across 16 natural language voice prompts. The AI swarm autonomously produced 133+ production-ready campaign assets in 64 minutes of wall-clock execution time.
+The operator provided approximately 5 minutes of creative direction across 21 natural language voice prompts. The AI swarm autonomously produced 133 campaign assets in 96 minutes of wall-clock time (64 minutes of active generation).

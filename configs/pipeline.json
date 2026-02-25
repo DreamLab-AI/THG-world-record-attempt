@@ -120,7 +120,7 @@
     "scene_riffs_duration_minutes": 12,
     "repose_duration_minutes": 6,
     "total_wall_clock_minutes": 64,
-    "voice_prompts": 16,
+    "voice_prompts": 21,
     "assets_per_minute": 2.1,
     "peak_parallel_rate": 4.7,
     "traditional_baseline_hours": 4,
