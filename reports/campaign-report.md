@@ -168,8 +168,74 @@ Installed `ComfyUI-MultiGPU` custom node (pollockjj fork). Workflow uses:
 - `final_shot05_night_{16x9,1x1,9x16}.png`
 - `final_shot06_back_{16x9,1x1,9x16}.png`
 
-**Animated (4 videos):**
+**Animated (6 videos):**
 - `anim_hero_16x9.mp4` (6.2MB, 8s)
+- `anim_hero_9x16.mp4` (4.7MB, 8s)
 - `anim_rain_16x9.mp4` (6.2MB, 8s)
+- `anim_rain_9x16.mp4` (4.9MB, 8s)
 - `anim_brutalist_9x16.mp4` (3.0MB, 8s)
 - `anim_night_9x16.mp4` (3.9MB, 8s)
+
+---
+
+## Phase 5: Scene Riffs - Creative Campaign Extension
+
+### Concept
+
+Three new scene environments were provided as creative direction references, each featuring chrome mannequins in surreal retail-futurism settings. The dress remains the single constant element across all variations.
+
+### Input Scenes
+
+| Scene | Description | Mood |
+|-------|-------------|------|
+| White Grid Room | White tiled cube room, floating smiley face balloons, 2 mannequins in denim | Surreal, Pop, Fun |
+| Neon Corridor | Dark corridor with vertical neon light bars, chrome robot mannequin | Moody, Futuristic, Editorial |
+| Black Grid Room | Tron-like black grid with neon blue edges, 2 chrome mannequins, overhead lights | Dramatic, Tech, Avant-Garde |
+
+### Pipeline Architecture
+
+A 3-agent parallel swarm was deployed:
+
+| Agent | Task | Method |
+|-------|------|--------|
+| Scene Cleaner | Remove existing mannequins, preserve environments + smileys | Nano Banana (gemini-2.5-flash-image) inpainting |
+| Direct Composite | Place chrome mannequin + dress into each scene (9 variations) | Nano Banana dual-image (garment ref + scene) |
+| Creative Riff | High-concept editorial variations beyond literal scenes (10 images) | Nano Banana single-image creative generation |
+
+### Creative Direction: Scene Composites (9 shots)
+
+**White Grid Room (3 variations):**
+- Center stance: Mannequin walking forward, smileys floating around
+- Dynamic stride: Mid-movement, smiley in foreground bokeh
+- Seated: Graceful floor pose, pinstriped skirt fanning on white tiles
+
+**Neon Corridor (3 variations):**
+- Emerge: Mannequin stepping from darkness, neon rim lighting on chrome
+- Profile: Side-on editorial, dress catching teal neon glow
+- Dramatic: Low angle looking up, neon bars framing like cathedral pillars
+
+**Black Grid Room (3 variations):**
+- Standing: Single mannequin, neon grid reflecting on chrome skin
+- Seated: Perched on geometric cube, skirt draped over edge
+- Duo: Two mannequins both wearing the dress, twin editorial
+
+### Creative Direction: Riff Variations (10 shots)
+
+| Riff | Theme | Concept |
+|------|-------|---------|
+| Smiley Rain | Pop-surreal | Mannequin in heavy rain, giant smiley weather balloons in sky |
+| Smiley Field | Minimalist | Infinite white void, dozens of smiley spheres at varying distances |
+| Smiley Underwater | Surreal | Underwater fashion, smileys drifting like jellyfish, light rays |
+| Neon Cityscape | Cyberpunk | Tokyo rooftop at night, neon blur background, Blade Runner mood |
+| Neon Laser | Sci-fi | Dark void with geometric laser beams in blue/magenta |
+| Grid Infinity | Art | Infinite mirror room (Kusama-inspired), pinstripes in reflections |
+| Grid Hologram | Cyberpunk | Holographic projection with scan lines, blue grid floor |
+| Museum | Conceptual | Art installation in marble gallery, velvet rope, floating smiley |
+| Desert | Editorial | Golden hour, cracked earth, wind-blown skirt, amber sky smileys |
+| Greenhouse | Nature | Victorian greenhouse with real chrysanthemums mirroring bodice art |
+
+### Engines Used
+
+- **Nano Banana** (gemini-2.5-flash-image): Primary generation engine for all scene compositing
+- **Local Flux 2 Dev**: Available for img2img refinement passes via ComfyUI multi-GPU pipeline
+- **Veo 3.1**: Planned for animation of best scene riff outputs
