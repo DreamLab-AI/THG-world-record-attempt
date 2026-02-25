@@ -1,0 +1,128 @@
+{
+  "last_node_id": 7,
+  "last_link_id": 5,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [100, 100],
+      "size": [315, 314],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["1.png", "image"],
+      "title": "Source Mannequin (outfit to keep)"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [100, 480],
+      "size": [315, 314],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [2], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["24-Reference for pose.png", "image"],
+      "title": "Pose Reference (24 or 26)"
+    },
+    {
+      "id": 3,
+      "type": "ImageBatch",
+      "pos": [500, 280],
+      "size": [210, 46],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image1", "type": "IMAGE", "link": 1},
+        {"name": "image2", "type": "IMAGE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "ImageBatch"},
+      "title": "Batch Source + Pose Ref"
+    },
+    {
+      "id": 4,
+      "type": "GeminiImageNode",
+      "pos": [780, 100],
+      "size": [400, 400],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [4], "slot_index": 0},
+        {"name": "TEXT", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "GeminiImageNode"},
+      "widgets_values": [
+        "Two images provided.\n\nIMAGE 1 (source): A chrome mannequin in a concrete studio wearing a specific outfit. This is the mannequin whose outfit must be preserved exactly.\n\nIMAGE 2 (pose reference): A chrome mannequin in the TARGET body pose.\n\nYOUR TASK: Generate a single image that takes the EXACT mannequin and EXACT outfit/clothes/accessories/shoes/bag from IMAGE 1, but changes the body pose to EXACTLY match the stance and body position from IMAGE 2.\n\nCRITICAL REQUIREMENTS:\n1. The OUTFIT must be IDENTICAL to IMAGE 1 - same clothes, colors, accessories, shoes, bag\n2. The BODY POSE must match IMAGE 2 - same leg position, arm position, weight distribution, head angle\n3. Keep the concrete studio environment with softbox lighting\n4. Keep the chrome mannequin skin and head\n5. Output at high resolution in 3:4 portrait format\n\nDo NOT change the outfit. Do NOT change the environment. ONLY change the body pose.\nOutput ONE image only.",
+        "gemini-2.5-flash-image",
+        42,
+        "auto",
+        "IMAGE"
+      ],
+      "title": "Nano Banana Repose"
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [1260, 200],
+      "size": [315, 270],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 4}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["reposed_"],
+      "title": "Save Reposed Output"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "IMAGE"],
+    [2, 2, 0, 3, 1, "IMAGE"],
+    [3, 3, 0, 4, 0, "IMAGE"],
+    [4, 4, 0, 5, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Topshop SS26 - Mannequin Repose Workflow (Nano Banana)",
+      "bounding": [60, 40, 1560, 810],
+      "color": "#3f789e",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 1, "offset": [0, 0]},
+    "manual_config": {
+      "description": "Mannequin repose workflow for Topshop SS26 Agentic Catwalk. Uses Nano Banana (Gemini 2.5 Flash Image) to change mannequin body pose while preserving exact outfit.",
+      "usage": [
+        "1. Set 'Source Mannequin' to the image whose outfit you want to keep",
+        "2. Set 'Pose Reference' to either 24-Reference or 26-Reference for target pose",
+        "3. Adjust the prompt for specific pose details if needed",
+        "4. Change seed for variations",
+        "5. Queue prompt to generate"
+      ],
+      "requires": "GOOGLE_API_KEY environment variable set in ComfyUI container",
+      "models_used": "gemini-2.5-flash-image (Nano Banana)",
+      "task": "Repose 28 mannequin images to match pose 24 (power stance) or pose 26 (walking stride)"
+    }
+  },
+  "version": 0.4
+}

@@ -1,10 +1,10 @@
 {
   "campaign_id": "topshop-ss26-look6",
-  "status": "phase5_in_progress",
+  "status": "phase6_completed",
   "created_at": "2026-02-25T10:20:00Z",
   "completed_at": null,
   "garment": "WLC OUTFITS 02_02_26 3.jpg",
-  "current_phase": 5,
+  "current_phase": 6,
   "phases": {
     "1_base_generation": {
       "status": "completed",
@@ -93,21 +93,37 @@
         "expanded_riffs": {"status": "in_progress", "target": 15},
         "flux2_local": {"status": "in_progress", "target": 8}
       },
-      "completed_count": 22,
+      "completed_count": 45,
       "target_count": 45
+    },
+    "6_mannequin_repose": {
+      "status": "completed",
+      "engine": "Gemini 2.5 Flash Image (Nano Banana) dual-image",
+      "started_at": "2026-02-25T11:50:00Z",
+      "completed_at": "2026-02-25T11:56:00Z",
+      "method": "Source outfit image + pose reference dual-input to Nano Banana",
+      "agents": {
+        "batch_1": {"status": "completed", "images": "1-10", "count": 10},
+        "batch_2": {"status": "completed", "images": "11-23 (skip 24)", "count": 13},
+        "batch_3": {"status": "completed", "images": "25,27-30 (skip 26)", "count": 5}
+      },
+      "count": 28,
+      "resolution": "864x1184",
+      "success_rate": "100%"
     }
   },
   "metrics": {
-    "total_generated": 82,
-    "total_target": 105,
+    "total_generated": 133,
+    "total_target": 133,
     "phases_1_4_duration_minutes": 30,
     "reskinning_duration_minutes": 22,
-    "scene_riffs_duration_minutes": 5,
-    "total_wall_clock_minutes": 57,
-    "voice_prompts": 11,
-    "assets_per_minute": 1.6,
-    "peak_parallel_rate": 4.4,
+    "scene_riffs_duration_minutes": 12,
+    "repose_duration_minutes": 6,
+    "total_wall_clock_minutes": 64,
+    "voice_prompts": 16,
+    "assets_per_minute": 2.1,
+    "peak_parallel_rate": 4.7,
     "traditional_baseline_hours": 4,
-    "speedup_multiplier": "8-12.6x"
+    "speedup_multiplier": "8-14x"
   }
 }

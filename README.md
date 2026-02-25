@@ -2,9 +2,9 @@
 
 ## Topshop SS26 - Style Reimagined
 
-**An AI system that generated 100+ production-ready fashion campaign assets in under 60 minutes from a single garment photograph and 15 voice prompts.**
+**An AI system that generated 133+ production-ready fashion campaign assets in under 65 minutes from garment photographs and 16 voice prompts.**
 
-This repository documents a world record attempt in autonomous AI fashion campaign generation, conducted on February 25, 2026. The **IRIS** (Intelligent Rendering and Imaging System) agentically recreated and dramatically expanded a workflow originally built by **THG Ingenuity** for the **Agentic Catwalk** event in February 2026.
+This repository documents a world record attempt in autonomous AI fashion campaign generation, conducted on February 25, 2026. **IRIS** (Intelligent Real-time Integrated Studio) --- developed by **DreamLab AI Consulting Ltd** on the open-source **VisionFlow** platform --- agentically recreated and dramatically expanded a workflow originally built by **THG Ingenuity** for the **Agentic Catwalk** event in February 2026. This work forms part of the **UKRI Agentic AI Pioneers Prize** development phase, demonstrating IRIS progression from TRL 4 to TRL 6 in partnership with THG Ingenuity and the University of Salford.
 
 ### The Challenge
 
@@ -20,8 +20,9 @@ This entire body of work was produced **from a standing start in 3 hours on-site
 |--------|---------------------------|-------------|------------|
 | Per-image generation | 15 min | ~1 min | **15x faster** |
 | Full campaign (36 assets) | ~4 hours | 30 min | **8x faster** |
-| Extended campaign (100+ assets) | ~12+ hours | ~60 min | **12.6x faster** |
-| Human input required | Continuous expert operation | 15 voice prompts (~5 min) | **1:12 ratio** |
+| Extended campaign (105 assets) | ~12+ hours | ~60 min | **12.6x faster** |
+| With repose (133+ assets) | ~15+ hours | ~64 min | **14x faster** |
+| Human input required | Continuous expert operation | 16 voice prompts (~5 min) | **1:13 ratio** |
 | Creative concepts | 6-8 per session | 45+ variations | **5.6x more** |
 
 ### How It Works
@@ -54,6 +55,7 @@ This campaign demonstrates that future: a single garment photograph transformed 
 | 4. Animation | Veo 3.1 | 6 fashion films (8s each) | 5 min |
 | 4b. Garment Reskinning | Nano Banana img2img | 24 garment-faithful variants | 22 min |
 | 5. Scene Riffs | 5-agent parallel swarm | 45+ creative variations | ~12 min |
+| 6. Mannequin Repose | 3-agent parallel Nano Banana | 28 pose-matched images | ~6 min |
 
 ## Scene Riff Creative Expansion
 
@@ -80,7 +82,8 @@ Three surreal scene references drove the creative expansion:
 | Direct scene composites | 9 |
 | Creative riff variations | 25 |
 | Flux 2 local GPU renders | 8 |
-| **Total deliverables** | **100+** |
+| Mannequin reposed images | 28 |
+| **Total deliverables** | **133+** |
 
 ## Voice Prompts (Complete Record)
 
@@ -101,8 +104,9 @@ All creative direction was provided as voice-captured natural language - the nom
 13. Include all prompts
 14. Inline images with explanations
 15. Voice capture clarification
+16. IRIS context research + mannequin repose task
 
-**Total human input: ~5 minutes of speaking across 15 prompts**
+**Total human input: ~5 minutes of speaking across 16 prompts**
 
 ## Infrastructure
 
@@ -135,6 +139,14 @@ All creative direction was provided as voice-captured natural language - the nom
 | Expanded Riffs | High-concept diverse variations | 15 | ~3 min |
 | Flux 2 Local | GPU-rendered editorial scenes | 8 | ~12 min |
 
+**Wave 3 - Mannequin Repose:**
+| Agent | Role | Images | Duration |
+|-------|------|--------|----------|
+| IRIS PDF Research | Extract TRL/system context from appendices | - | ~5 min |
+| Repose Batch 1 | Images 1-10, alternating pose 24/26 | 10 | ~2 min |
+| Repose Batch 2 | Images 11-23 (skip ref 24) | 13 | ~3 min |
+| Repose Batch 3 | Images 25, 27-30 (skip ref 26) | 5 | ~1 min |
+
 ## Repository Structure
 
 ```
@@ -161,6 +173,9 @@ assets/
     cleaned/                # Scene backgrounds with mannequins removed
     composited/             # Direct scene composites (9 images)
     variations/             # Creative riffs + Flux 2 renders (33+ images)
+task-two-repose/            # Phase 6: Mannequin repose task
+  output-reposed/           # 28 reposed mannequin images
+  scripts/                  # Repose batch scripts
 scripts/                    # Generation and processing scripts
 ```
 

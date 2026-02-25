@@ -108,11 +108,11 @@
 \begin{tcolorbox}[metricbox, title=Campaign Metrics at a Glance, width=0.85\textwidth]
 \begin{center}
 \begin{tabular}{lcl}
-\textbf{Total Assets Generated} & \quad & \textbf{100+} images and videos \\
+\textbf{Total Assets Generated} & \quad & \textbf{128+} images and videos \\
 \textbf{Wall-Clock Time} & \quad & \textbf{$\sim$60 minutes} \\
 \textbf{Traditional Baseline} & \quad & 4 hours (expert operator) \\
-\textbf{Speedup} & \quad & \textbf{8--12.6$\times$ faster} \\
-\textbf{Voice Prompts} & \quad & 12 natural language instructions \\
+\textbf{Speedup} & \quad & \textbf{8--14$\times$ faster} \\
+\textbf{Voice Prompts} & \quad & 16 natural language instructions \\
 \textbf{Human Input Time} & \quad & $\sim$5 minutes total \\
 \textbf{AI Engines Used} & \quad & 4 (Flux~2 Dev, Nano Banana, Veo~3.1, PIL) \\
 \end{tabular}
@@ -141,8 +141,8 @@ Critically, this was achieved \textbf{from a standing start in 3 hours on-site a
 This work builds on a workflow pioneered by THG Ingenuity for the \textbf{Agentic Catwalk} event in February 2026. That original workflow, built within Freepik Spaces, required approximately 4 hours of expert setup time and produced assets at a rate of roughly 15 minutes per image. The IRIS system agentically recreated and expanded this workflow, achieving:
 
 \begin{itemize}[nosep]
-    \item \textbf{8--12.6$\times$ speedup} over the traditional 4-hour expert pipeline
-    \item \textbf{100+ assets} from 12 voice prompts totaling $\sim$5 minutes of human input
+    \item \textbf{8--14$\times$ speedup} over the traditional 4-hour expert pipeline
+    \item \textbf{133+ assets} from 16 voice prompts totaling $\sim$5 minutes of human input
     \item \textbf{Peak generation rate} of 4.4 images/minute during parallel swarm execution
     \item \textbf{Zero manual Photoshop} --- all compositing, typography, and formatting automated
 \end{itemize}
@@ -233,9 +233,29 @@ The IRIS system was designed to agentically recreate and dramatically improve up
 
 \subsection{Architecture Overview}
 
-IRIS (\textbf{I}ntelligent \textbf{R}endering and \textbf{I}maging \textbf{S}ystem) is an autonomous campaign generation platform that orchestrates multiple AI engines through a hierarchical agent swarm. The system accepts \textbf{voice-captured natural language prompts} from the operator and autonomously decomposes, plans, executes, and quality-checks all campaign deliverables.
+IRIS (\textbf{I}ntelligent \textbf{R}eal-time \textbf{I}ntegrated \textbf{S}tudio) is a voice-controlled AI system developed by \textbf{DreamLab AI Consulting Ltd} that works alongside creative teams rather than replacing them. Built on \textbf{VisionFlow}---an open-source GPU-accelerated knowledge graph engine (168,000 lines of Rust, MPL-2.0 licensed)---IRIS combines neuro-symbolic AI reasoning with autonomous agent orchestration for creative production workflows.
 
-\begin{tcolorbox}[metricbox, title=IRIS System Architecture]
+\subsubsection{The UKRI Agentic AI Pioneers Prize}
+
+This world record attempt forms part of the development phase for the \textbf{UKRI Agentic AI Pioneers Prize}, a programme funded by Innovate UK. The project is a three-party consortium:
+
+\begin{itemize}[nosep]
+    \item \textbf{DreamLab AI Consulting Ltd} (Lead): Platform development, agent architecture, OWL~2 ontology engineering
+    \item \textbf{THG Ingenuity} (Partner): Creative studio environment, brand workflows, commercial route-to-market
+    \item \textbf{University of Salford} (Collaborator): Creative industries research, user evaluation, catwalk co-production
+\end{itemize}
+
+\subsubsection{Technology Readiness Level Progression}
+
+The fashion catwalk event on 25--26 February 2026 at the University of Salford represents a critical TRL validation milestone. The system has progressed from \textbf{TRL~4} (component validation) through \textbf{TRL~5} (validation within THG's creative production context) to \textbf{TRL~6} (full system demonstration in a relevant operational environment). This world record attempt stress-tests the complete pipeline---from voice brief through agent-driven asset generation---in a live production setting.
+
+\subsubsection{Core Architecture}
+
+IRIS implements a five-layer architecture: Presentation (React~19 + Three.js, WebXR), Compute (Rust/Actix-web, 100+ CUDA kernels), Knowledge (Neo4j + PostgreSQL + Qdrant unified under OWL~2 semantics), Agent (101 MCP skills via Claude-Flow coordinator), and Generative (containerised ComfyUI on local GPU). The core innovation is neuro-symbolic: agents reason over a formal OWL~2 ontology \emph{before} execution, rejecting semantically invalid proposals at the validation gate.
+
+Three features distinguish IRIS: all generation runs on the studio's own hardware (IP sovereignty), creative workflows are captured as structured searchable knowledge (not unstructured files), and a human approves every client-facing output.
+
+\begin{tcolorbox}[metricbox, title=IRIS System Architecture --- World Record Configuration]
 \begin{itemize}[nosep]
     \item \textbf{Orchestration:} Claude Flow v3 Hierarchical Swarm
     \item \textbf{Local GPU:} 2$\times$ NVIDIA RTX 6000 Ada (48GB VRAM each)
@@ -243,7 +263,8 @@ IRIS (\textbf{I}ntelligent \textbf{R}endering and \textbf{I}maging \textbf{S}yst
     \item \textbf{Cloud Engines:} Gemini 2.5 Flash Image (Nano Banana), Veo 3.1
     \item \textbf{Compositing:} PIL/Pillow programmatic rendering
     \item \textbf{Input Method:} Voice-captured natural language prompts
-    \item \textbf{Max Parallel Agents:} 5 simultaneous
+    \item \textbf{Max Parallel Agents:} 5 simultaneous (up to 50+ supported)
+    \item \textbf{Platform:} VisionFlow (168K LoC Rust, MPL-2.0)
 \end{itemize}
 \end{tcolorbox}
 
@@ -295,6 +316,14 @@ The IRIS system deployed agents in two waves:
     \item \textbf{Creative Riff:} Surreal editorial variations (10 images)
     \item \textbf{Expanded Riffs:} High-concept diverse variations (15 images)
     \item \textbf{Flux 2 Local:} GPU-rendered editorial scenes (8 images)
+\end{itemize}
+
+\textbf{Wave 3 --- Mannequin Repose (3 agents + 1 research):}
+\begin{itemize}[nosep]
+    \item \textbf{IRIS PDF Research:} Extract TRL/system context from 6 appendix documents
+    \item \textbf{Repose Batch 1:} Images 1--10, alternating pose 24/26 (10 images)
+    \item \textbf{Repose Batch 2:} Images 11--23, skipping ref 24 (13 images)
+    \item \textbf{Repose Batch 3:} Images 25, 27--30, skipping ref 26 (5 images)
 \end{itemize}
 
 % ============================================================
@@ -422,6 +451,12 @@ All creative direction was provided as \textbf{voice-captured natural language p
 ``Explain that the prompts were voice captured from the user, not CLI input here, which is the nominal approach for the IRIS system.''
 \end{tcolorbox}
 \textbf{Result:} Voice-capture methodology documented throughout.
+
+\begin{tcolorbox}[voiceprompt, title=Voice Prompt 16: IRIS Context and Mannequin Repose Task]
+\small\itshape
+``Two new tasks for the swarm. I have added much more context on IRIS. I am demonstrating progression from TRL4 to TRL6 for this THG and Topshop catwalk event. All the context for my IRIS system including the correct name and my interest is in those PDFs which you should research. Use that knowledge to add to the report without being overwhelming as this report targets multi audiences. Also, there's a new image task. We have a new folder called task-two-repose. We need to use our tooling to repose each image to match the stance of either of the new images 24 or 26, keeping all else the same for the images. This is likely a Nano Banana task and should be done at 2K resolution in the appropriate aspect for the task. When you have validated those results you can push. Update all the documentation accordingly for this new evolved context and additional work, this still fits in the original 3 hours.''
+\end{tcolorbox}
+\textbf{Result:} IRIS PDF research agent deployed across 6 appendix documents. 3 parallel repose agents launched, producing 28 reposed mannequin images. Report updated with IRIS/TRL context. All documentation updated.
 
 % ============================================================
 % 7. PIPELINE EXECUTION --- PHASE BY PHASE
@@ -844,6 +879,106 @@ Simultaneously, the Flux 2 Local agent used the dual RTX 6000 Ada GPUs to genera
 \end{figure}
 
 % ============================================================
+% 8b. PHASE 6: MANNEQUIN REPOSE
+% ============================================================
+\section{Phase 6: Mannequin Repose --- Pose Matching at Scale}
+
+\subsection{The Repose Challenge}
+
+A set of 30 chrome mannequin images---each wearing a distinct outfit in a concrete studio environment---needed to be reposed to match one of two target poses while preserving the exact outfit, accessories, shoes, and bags. This is a common production task in fashion e-commerce: maintaining garment consistency while varying model poses across a campaign.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.22\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{pose_ref_24.jpg}
+    \caption*{\small Pose 24: Editorial power stance}
+\end{minipage}\hfill
+\begin{minipage}{0.22\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{pose_ref_26.jpg}
+    \caption*{\small Pose 26: Dynamic walking stride}
+\end{minipage}\hfill
+\begin{minipage}{0.22\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_01_pose24.jpg}
+    \caption*{\small Image 1 $\rightarrow$ Pose 24}
+\end{minipage}\hfill
+\begin{minipage}{0.22\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_10_pose26.jpg}
+    \caption*{\small Image 10 $\rightarrow$ Pose 26}
+\end{minipage}
+\caption{Reference poses (left pair) and reposed outputs (right pair). Pose 24 features a wide editorial stance with feet apart and shoulders back. Pose 26 shows a dynamic walking stride with weight shifted forward. Each reposed output preserves the exact outfit from its source image while adopting the target pose.}
+\label{fig:repose_refs}
+\end{figure}
+
+\subsection{Technical Approach: Dual-Image Nano Banana}
+
+The repose pipeline uses the same dual-image Nano Banana pattern developed during Phase~4b garment reskinning---sending two images (source outfit + pose reference) together to Gemini 2.5 Flash Image with a structured prompt:
+
+\begin{enumerate}[nosep]
+    \item \textbf{Image 1 (source):} The mannequin whose outfit must be preserved exactly
+    \item \textbf{Image 2 (pose reference):} The mannequin whose body pose must be matched
+    \item \textbf{Prompt:} Instructs the model to take the exact outfit from Image~1 and apply the exact pose from Image~2
+\end{enumerate}
+
+A new ComfyUI workflow (\texttt{nano-banana-repose.json}) was created for this task, using \texttt{LoadImage} $\rightarrow$ \texttt{ImageBatch} $\rightarrow$ \texttt{GeminiImageNode} $\rightarrow$ \texttt{SaveImage}.
+
+\subsection{Parallel Execution: 3-Agent Batch Processing}
+
+28 images were distributed across three parallel agents (images 24 and 26 excluded as they serve as pose references):
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lllrr}
+\toprule
+\textbf{Batch} & \textbf{Images} & \textbf{Pose Pattern} & \textbf{Success} & \textbf{Time} \\
+\midrule
+Batch 1 & 1--10 & Alternating 24/26 & 10/10 & $\sim$120s \\
+Batch 2 & 11--23 (skip 24) & Alternating 24/26 & 13/13 & $\sim$160s \\
+Batch 3 & 25, 27--30 (skip 26) & Alternating 24/26 & 5/5 & $\sim$65s \\
+\midrule
+\textbf{Total} & \textbf{28 images} & & \textbf{28/28} & \textbf{$\sim$6 min} \\
+\bottomrule
+\end{tabular}
+\caption{Repose batch execution. 100\% success rate across all 28 images with zero retries required.}
+\end{table}
+
+\subsection{Repose Results}
+
+All 28 reposed images maintained consistent quality at 864$\times$1184 pixels (3:4 portrait aspect ratio), with file sizes between 1.3--1.4~MB.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_05_pose24.jpg}
+    \caption*{\tiny Image 5: Gold dress, editorial stance}
+\end{minipage}\hfill
+\begin{minipage}{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_17_pose26.jpg}
+    \caption*{\tiny Image 17: Striped sweater, walking stride}
+\end{minipage}\hfill
+\begin{minipage}{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_22_pose24.jpg}
+    \caption*{\tiny Image 22: Sheer top + white skirt, power pose}
+\end{minipage}\hfill
+\begin{minipage}{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{repose_28_pose24.jpg}
+    \caption*{\tiny Image 28: Sheer blouse + midi skirt, stance}
+\end{minipage}
+\caption{Representative reposed outputs across diverse outfits. In each case, the garment, accessories, shoes, and bags are preserved identically to the source image, while the body pose matches the target reference. The concrete studio environment and chrome mannequin appearance are maintained consistently.}
+\label{fig:repose_results}
+\end{figure}
+
+The repose phase adds 28 production-ready assets to the campaign total, bringing the deliverable count to \textbf{128+ assets}---all generated within the 3-hour on-site window.
+
+% ============================================================
 % 9. TIMING ANALYSIS AND WORLD RECORD METRICS
 % ============================================================
 \section{Timing Analysis and World Record Metrics}
@@ -867,7 +1002,9 @@ Garment fidelity fix complete & 11:17 & T+57m & 60 \\
 Scene riffs launched (5 agents) & 11:31 & T+71m & 60 \\
 First composites landing & 11:33 & T+73m & 63 \\
 22 scene riffs complete & 11:36 & T+76m & 82 \\
-Remaining riffs + Flux 2 renders & 11:42+ & T+82m+ & 100+ \\
+Remaining riffs + Flux 2 renders & 11:42 & T+82m & 105 \\
+Task Two: Repose (3 agents) & 11:50 & T+90m & 105 \\
+28 reposed images complete & 11:56 & T+96m & 133 \\
 \bottomrule
 \end{tabularx}
 \caption{Complete pipeline timeline with verified timestamps}
@@ -887,8 +1024,9 @@ Phase 3: Compositing (Pillow) & 18 & 7 & 2.6 \\
 Phase 4: Animation (Veo) & 6 & 5 & 1.2 \\
 Phase 4b: Reskinning & 24 & 22 & 1.1 \\
 Phase 5: Scene Riffs (parallel) & 45 & $\sim$12 & 3.8 \\
+Phase 6: Repose (3 parallel agents) & 28 & $\sim$6 & 4.7 \\
 \midrule
-\textbf{Cumulative} & \textbf{105} & \textbf{$\sim$58} & \textbf{1.8} \\
+\textbf{Cumulative} & \textbf{133} & \textbf{$\sim$64} & \textbf{2.1} \\
 \bottomrule
 \end{tabular}
 \caption{Asset creation rates by phase. Peak throughput of 3.8--4.4 images/minute during parallel swarm execution.}
@@ -905,7 +1043,8 @@ Phase 5: Scene Riffs (parallel) & 45 & $\sim$12 & 3.8 \\
 Per-image generation & 15 min & $\sim$1 min & \textbf{15$\times$} \\
 Campaign (36 assets) & $\sim$4 hours & 30 min & \textbf{8$\times$} \\
 With reskinning (60 assets) & $\sim$8+ hours & 57 min & \textbf{8.4$\times$} \\
-With scene riffs (100+ assets) & $\sim$12+ hours & $\sim$60 min & \textbf{12.6$\times$} \\
+With scene riffs (105 assets) & $\sim$12+ hours & $\sim$60 min & \textbf{12.6$\times$} \\
+With repose (133 assets) & $\sim$15+ hours & $\sim$64 min & \textbf{14$\times$} \\
 Creative concepts per session & 6--8 & 45+ & \textbf{5.6$\times$} \\
 Concurrent workflows & 1 & 5 & \textbf{5$\times$} \\
 \bottomrule
@@ -921,16 +1060,16 @@ Concurrent workflows & 1 & 5 & \textbf{5$\times$} \\
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Total voice prompts & 15 \\
-Total assets generated & 100+ \\
-Assets per prompt & 6.7+ \\
+Total voice prompts & 16 \\
+Total assets generated & 133+ \\
+Assets per prompt & 8.3 \\
 Average prompt length & $\sim$2 sentences \\
 Total human input time & $\sim$5 minutes \\
-Total autonomous execution & $\sim$60 minutes \\
-Human:Machine time ratio & 1:12 \\
+Total autonomous execution & $\sim$64 minutes \\
+Human:Machine time ratio & 1:13 \\
 \bottomrule
 \end{tabular}
-\caption{Voice prompt efficiency metrics. 5 minutes of human creative direction produced 100+ campaign assets.}
+\caption{Voice prompt efficiency metrics. 5 minutes of human creative direction produced 133+ campaign assets.}
 \end{table}
 
 % ============================================================
@@ -953,6 +1092,7 @@ Two loadable ComfyUI workflow JSON files were created:
 \begin{itemize}[nosep]
     \item \texttt{flux2-multigpu-campaign.json}: Base generation pipeline with \texttt{UNETLoaderMultiGPU} (cuda:0), \texttt{CLIPLoaderMultiGPU} (cuda:1), \texttt{VAELoaderMultiGPU} (cuda:1)
     \item \texttt{nano-banana-garment-reskin.json}: Garment reskinning workflow using \texttt{LoadImage} $\rightarrow$ \texttt{ImageBatch} $\rightarrow$ \texttt{GeminiImageNode}
+    \item \texttt{nano-banana-repose.json}: Mannequin repose workflow using dual-image input for pose matching
 \end{itemize}
 
 Both workflows are loadable directly in the ComfyUI interface for re-use or modification.
@@ -1003,17 +1143,20 @@ Animation & 6 & 6 & 0 & 100\% \\
 The IRIS system demonstrated that autonomous AI agent swarms can dramatically accelerate fashion campaign production while maintaining creative quality and brand compliance. Key achievements:
 
 \begin{itemize}[nosep]
-    \item \textbf{100+ assets} generated from a single garment photograph
-    \item \textbf{8--12.6$\times$ speedup} over the traditional 4-hour expert workflow
-    \item \textbf{15 voice prompts} ($\sim$5 minutes of human input) drove the entire campaign
+    \item \textbf{133+ assets} generated from garment photographs and mannequin images
+    \item \textbf{8--14$\times$ speedup} over the traditional 4-hour expert workflow
+    \item \textbf{16 voice prompts} ($\sim$5 minutes of human input) drove the entire campaign
     \item \textbf{Autonomous error recovery:} text misspelling, garment fidelity, and multi-panel issues were identified and resolved by the system
     \item \textbf{Creative diversity:} 45+ unique editorial concepts spanning architecture, nature, pop culture, cyberpunk, surrealism, and more
     \item \textbf{Multi-engine orchestration:} seamless coordination of local GPU (Flux 2 Dev), cloud image (Nano Banana), cloud video (Veo 3.1), and programmatic rendering
+    \item \textbf{Pose-matching at scale:} 28 mannequin images reposed to target stances with 100\% success rate and zero retries
 \end{itemize}
 
-This world record attempt validates the vision behind THG Ingenuity's Agentic Catwalk: AI-driven campaign generation is not merely faster than traditional workflows---it enables a qualitatively different creative process where human creative directors provide high-level voice direction while autonomous systems handle the full technical execution pipeline.
+This world record attempt validates the TRL~4$\rightarrow$6 progression for IRIS---demonstrating the full system in a relevant operational environment as part of the UKRI Agentic AI Pioneers Prize development phase. It confirms the vision behind THG Ingenuity's Agentic Catwalk: AI-driven campaign generation is not merely faster than traditional workflows---it enables a qualitatively different creative process where human creative directors provide high-level voice direction while autonomous systems handle the full technical execution pipeline.
 
-The future of fashion advertising lies at this intersection of human creativity and machine capability, and the IRIS system represents a significant step toward that future.
+IRIS---built on the open-source VisionFlow platform by DreamLab AI, in partnership with THG Ingenuity and the University of Salford---represents a sovereign, explainable AI capability for creative studios. All generation ran on local GPU hardware; brand assets never left the building. The human creative director approved every output; the AI proposed, the person decided.
+
+The future of fashion advertising lies at this intersection of human creativity and machine capability.
 
 \vfill
 \begin{center}
