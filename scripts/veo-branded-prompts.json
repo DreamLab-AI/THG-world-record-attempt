@@ -1,0 +1,111 @@
+{
+  "campaign": "Topshop SS26 - Style Reimagined",
+  "model": "veo-3.1-generate-preview",
+  "method": "predictLongRunning (text-to-video)",
+  "duration_seconds": 8,
+  "branding": "STYLE REIMAGINED | TOPSHOP SS26",
+  "generated_at": "2026-02-25T13:12:53Z",
+  "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning",
+  "videos": [
+    {
+      "id": "greenhouse",
+      "scene_description": "Victorian greenhouse with real chrysanthemums",
+      "source_image": "assets/scene-riffs/variations/riff_greenhouse.png",
+      "output_file": "veo_greenhouse.mp4",
+      "aspect_ratio": "9:16",
+      "prompt": "Slow dolly push forward on an 85mm f/1.4 lens, shallow depth of field. A polished chrome mannequin wearing a cream sleeveless maxi dress with delicate black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the flowing A-line skirt stands centered in a grand Victorian greenhouse conservatory. The dress fabric sways gently in a warm draft, hem rippling subtly. Real chrysanthemum flowers in terracotta pots line iron-framed glass shelves on both sides. Warm golden afternoon sunlight streams through the glass roof panels, casting dappled botanical shadows across the cream fabric. Dust motes and pollen particles drift lazily through sunbeams. Condensation beads on glass panes. Style: High-fashion editorial, cinematic, Vogue Italia. Rich color grading with warm amber tones and jade green accents. No text, no subtitles, no watermarks. 8 seconds.",
+      "api_payload": {
+        "instances": [
+          {
+            "prompt": "Slow dolly push forward on an 85mm f/1.4 lens, shallow depth of field. A polished chrome mannequin wearing a cream sleeveless maxi dress with delicate black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the flowing A-line skirt stands centered in a grand Victorian greenhouse conservatory. The dress fabric sways gently in a warm draft, hem rippling subtly. Real chrysanthemum flowers in terracotta pots line iron-framed glass shelves on both sides. Warm golden afternoon sunlight streams through the glass roof panels, casting dappled botanical shadows across the cream fabric. Dust motes and pollen particles drift lazily through sunbeams. Condensation beads on glass panes. Style: High-fashion editorial, cinematic, Vogue Italia. Rich color grading with warm amber tones and jade green accents. No text, no subtitles, no watermarks. 8 seconds."
+          }
+        ],
+        "parameters": {
+          "aspectRatio": "9:16",
+          "durationSeconds": 8,
+          "sampleCount": 1
+        }
+      }
+    },
+    {
+      "id": "neon_cityscape",
+      "scene_description": "Tokyo/Blade Runner neon rooftop",
+      "source_image": "assets/scene-riffs/variations/riff_neon_cityscape.png",
+      "output_file": "veo_neon_cityscape.mp4",
+      "aspect_ratio": "9:16",
+      "prompt": "Slow lateral tracking shot right to left on an 85mm f/1.4 lens, telephoto compression with heavy bokeh. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum art on the bodice and thin vertical pinstripes on the A-line skirt stands on a rain-slicked Tokyo rooftop at night. The cream dress fabric flutters gently in the urban wind. Behind, a vast neon cityscape stretches to the horizon -- Blade Runner aesthetic with electric pink, cyan, and violet holographic billboards. Rain falls through neon light cones as silver streaks. Puddles on the concrete rooftop reflect the neon palette in long vertical streaks. The chrome mannequin surface catches and refracts the surrounding neon colors. Style: Cyberpunk high-fashion editorial, cinematic, W Magazine meets Ridley Scott. Cool blue-violet color grade with electric accent pops. No text, no subtitles, no watermarks. 8 seconds.",
+      "api_payload": {
+        "instances": [
+          {
+            "prompt": "Slow lateral tracking shot right to left on an 85mm f/1.4 lens, telephoto compression with heavy bokeh. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum art on the bodice and thin vertical pinstripes on the A-line skirt stands on a rain-slicked Tokyo rooftop at night. The cream dress fabric flutters gently in the urban wind. Behind, a vast neon cityscape stretches to the horizon -- Blade Runner aesthetic with electric pink, cyan, and violet holographic billboards. Rain falls through neon light cones as silver streaks. Puddles on the concrete rooftop reflect the neon palette in long vertical streaks. The chrome mannequin surface catches and refracts the surrounding neon colors. Style: Cyberpunk high-fashion editorial, cinematic, W Magazine meets Ridley Scott. Cool blue-violet color grade with electric accent pops. No text, no subtitles, no watermarks. 8 seconds."
+          }
+        ],
+        "parameters": {
+          "aspectRatio": "9:16",
+          "durationSeconds": 8,
+          "sampleCount": 1
+        }
+      }
+    },
+    {
+      "id": "neon_emerge",
+      "scene_description": "Neon corridor emergence",
+      "source_image": "assets/scene-riffs/composited/composite_neon_emerge.png",
+      "output_file": "veo_neon_emerge.mp4",
+      "aspect_ratio": "16:9",
+      "prompt": "Slow forward dolly on an 85mm f/1.4 lens, one-point perspective vanishing point. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the A-line skirt emerges from a dark corridor flanked by vertical neon light bars in teal and electric blue. The dress fabric catches the neon glow, cream fabric luminous against the darkness. The mannequin walks forward with measured confident strides, skirt swaying with each step. Volumetric haze drifts through the corridor, neon light rays cutting through the atmospheric fog. The polished concrete floor reflects the neon bars as elongated streaks. Rim lighting outlines the chrome mannequin silhouette in electric blue. Style: High-fashion editorial meets sci-fi cinema, Alexander McQueen runway energy. Dark moody color grade with teal and cobalt accents. No text, no subtitles, no watermarks. 8 seconds.",
+      "api_payload": {
+        "instances": [
+          {
+            "prompt": "Slow forward dolly on an 85mm f/1.4 lens, one-point perspective vanishing point. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the A-line skirt emerges from a dark corridor flanked by vertical neon light bars in teal and electric blue. The dress fabric catches the neon glow, cream fabric luminous against the darkness. The mannequin walks forward with measured confident strides, skirt swaying with each step. Volumetric haze drifts through the corridor, neon light rays cutting through the atmospheric fog. The polished concrete floor reflects the neon bars as elongated streaks. Rim lighting outlines the chrome mannequin silhouette in electric blue. Style: High-fashion editorial meets sci-fi cinema, Alexander McQueen runway energy. Dark moody color grade with teal and cobalt accents. No text, no subtitles, no watermarks. 8 seconds."
+          }
+        ],
+        "parameters": {
+          "aspectRatio": "16:9",
+          "durationSeconds": 8,
+          "sampleCount": 1
+        }
+      }
+    },
+    {
+      "id": "mirror_room",
+      "scene_description": "Kusama-inspired infinity mirror room",
+      "source_image": "assets/scene-riffs/variations/flux2_mirror_room.png",
+      "output_file": "veo_mirror_room.mp4",
+      "aspect_ratio": "16:9",
+      "prompt": "Slow orbit tracking shot circling the subject on an 85mm f/1.4 lens, shallow depth of field with infinite reflections stretching to vanishing points. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum art on the bodice and thin vertical pinstripes on the A-line skirt stands in the center of a Yayoi Kusama-inspired infinity mirror room. Hundreds of small warm LED light orbs float at varying heights, reflected infinitely in every mirror surface. The chrome mannequin multiplies endlessly in the mirrors. The cream dress glows warmly under the ambient LED orbs. The skirt hem drifts gently as if in a slow air current. Mirror reflections create a kaleidoscopic tunnel of fashion and light extending in all directions. Style: High-fashion editorial meets contemporary art installation, i-D Magazine aesthetic. Warm amber and soft pink color grade. No text, no subtitles, no watermarks. 8 seconds.",
+      "api_payload": {
+        "instances": [
+          {
+            "prompt": "Slow orbit tracking shot circling the subject on an 85mm f/1.4 lens, shallow depth of field with infinite reflections stretching to vanishing points. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum art on the bodice and thin vertical pinstripes on the A-line skirt stands in the center of a Yayoi Kusama-inspired infinity mirror room. Hundreds of small warm LED light orbs float at varying heights, reflected infinitely in every mirror surface. The chrome mannequin multiplies endlessly in the mirrors. The cream dress glows warmly under the ambient LED orbs. The skirt hem drifts gently as if in a slow air current. Mirror reflections create a kaleidoscopic tunnel of fashion and light extending in all directions. Style: High-fashion editorial meets contemporary art installation, i-D Magazine aesthetic. Warm amber and soft pink color grade. No text, no subtitles, no watermarks. 8 seconds."
+          }
+        ],
+        "parameters": {
+          "aspectRatio": "16:9",
+          "durationSeconds": 8,
+          "sampleCount": 1
+        }
+      }
+    },
+    {
+      "id": "cherry_blossom",
+      "scene_description": "Cherry blossom petals falling",
+      "source_image": "assets/scene-riffs/variations/riff_cherry_blossom.png",
+      "output_file": "veo_cherry_blossom.mp4",
+      "aspect_ratio": "9:16",
+      "prompt": "Slow upward tilt from hem to face on an 85mm f/1.4 lens, extremely shallow depth of field with creamy bokeh. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the flowing A-line skirt stands beneath a canopy of pale pink cherry blossom trees in full bloom. Hundreds of cherry blossom petals drift and spiral slowly downward through the frame, some landing on the cream fabric of the dress and settling on the chrome shoulders. A gentle spring breeze causes the dress hem to billow softly. Soft diffused afternoon light filters through the blossom canopy, casting delicate dappled shadows across the dress. The ground is carpeted with fallen pink petals. The chrome surface reflects soft pink tones from the surrounding blossoms. Style: High-fashion editorial, ethereal and romantic, Harper's Bazaar Japan aesthetic. Soft pastel color grade with blush pink and ivory tones. No text, no subtitles, no watermarks. 8 seconds.",
+      "api_payload": {
+        "instances": [
+          {
+            "prompt": "Slow upward tilt from hem to face on an 85mm f/1.4 lens, extremely shallow depth of field with creamy bokeh. A polished chrome mannequin wearing a cream sleeveless maxi dress with black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the flowing A-line skirt stands beneath a canopy of pale pink cherry blossom trees in full bloom. Hundreds of cherry blossom petals drift and spiral slowly downward through the frame, some landing on the cream fabric of the dress and settling on the chrome shoulders. A gentle spring breeze causes the dress hem to billow softly. Soft diffused afternoon light filters through the blossom canopy, casting delicate dappled shadows across the dress. The ground is carpeted with fallen pink petals. The chrome surface reflects soft pink tones from the surrounding blossoms. Style: High-fashion editorial, ethereal and romantic, Harper's Bazaar Japan aesthetic. Soft pastel color grade with blush pink and ivory tones. No text, no subtitles, no watermarks. 8 seconds."
+          }
+        ],
+        "parameters": {
+          "aspectRatio": "9:16",
+          "durationSeconds": 8,
+          "sampleCount": 1
+        }
+      }
+    }
+  ]
+}
