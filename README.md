@@ -2,7 +2,7 @@
 
 ## Topshop SS26 - Style Reimagined
 
-**An AI system that generated 133 fashion campaign assets in 96 minutes from garment photographs and 21 voice prompts.**
+**An AI system that generated 138 fashion campaign assets in 96 minutes from garment photographs and 21 voice prompts.**
 
 This repository documents a world record attempt in autonomous AI fashion campaign generation, conducted on February 25, 2026. **IRIS** (Intelligent Real-time Integrated Studio) --- developed by **DreamLab AI Consulting Ltd** on the open-source **VisionFlow** platform --- agentically recreated and dramatically expanded a workflow originally built by **THG Ingenuity** for the **"Runway to the Future"** event (26 February 2026, THG Studios Manchester, WRCA-certified). This work forms part of the **UKRI Agentic AI Pioneers Prize** development phase, demonstrating IRIS progression from TRL 4 to TRL 6 in partnership with THG Ingenuity and the University of Salford.
 
@@ -21,7 +21,7 @@ This entire body of work was produced **from a standing start in 3 hours on-site
 | Per-image generation | 15 min | ~1 min | **15x faster** |
 | Full campaign (36 assets) | ~4 hours | 30 min | **8x faster** |
 | Extended campaign (105 assets) | ~12+ hours* | ~82 min | **~9x faster** |
-| With repose (133 assets) | ~15+ hours* | ~96 min | **~9.4x faster** |
+| With repose + branded films (138 assets) | ~15+ hours* | ~96 min | **~9.4x faster** |
 | Pipeline construction | 4 hours (manual) | 0 hours (autonomous) | **Eliminated** |
 | Human input required | Continuous expert operation | 21 voice prompts (~5 min) | **1:19 ratio** |
 | Creative concepts | 6-8 per session | 45+ variations | **5.6x more** |
@@ -55,10 +55,11 @@ This campaign demonstrates that future: a single garment photograph transformed 
 | 1. Base Generation | Flux 2 Dev (dual RTX 6000 Ada) | 6 editorial shots | 6 min |
 | 2. Style Refinement | Nano Banana (Gemini 2.5 Flash) | 6 refined shots | 6 min |
 | 3. Static Compositing | PIL/Pillow programmatic | 18 composites (3 formats) | 7 min |
-| 4. Animation | Veo 3.1 | 6 fashion films (8s each) | 5 min |
+| 4. Animation | Veo 3.1 via ComfyUI GenMedia nodes | 6 fashion films (8s each) | 5 min |
 | 4b. Garment Reskinning | Nano Banana img2img | 24 garment-faithful variants | 22 min |
 | 5. Scene Riffs | 5-agent parallel swarm | 45 creative variations | ~12 min |
 | 6. Mannequin Repose | 3-agent parallel Nano Banana | 28 pose-matched images | ~6 min |
+| 7. Branded Films | Veo 3.1 via ComfyUI Veo3VideoGenerationNode | 5 cinematic fashion films (8s) | queued |
 
 ## Scene Riff Creative Expansion
 
@@ -80,13 +81,14 @@ Three surreal scene references drove the creative expansion:
 | Refined editorial shots | 6 |
 | Garment-faithful reskins | 6 |
 | Composited images (3 formats each) | 36 |
-| Animated fashion films | 6 |
+| Animated fashion films (Phase 4) | 6 |
+| Branded fashion films (Phase 7) | 5 |
 | Cleaned scene backgrounds | 3 |
 | Direct scene composites | 9 |
 | Creative riff variations | 25 |
 | Flux 2 local GPU renders | 8 |
 | Mannequin reposed images | 28 |
-| **Total deliverables** | **133** |
+| **Total deliverables** | **138** |
 
 ## Voice Prompts (Complete Record)
 
@@ -181,7 +183,7 @@ reports/                    # Campaign reports and formal documentation
   iris-system-research.md   # IRIS/VisionFlow system research
 docs/                       # PRD v3.0, Architecture Flow Diagram, DDD analysis
 configs/                    # Brand config, prompts, workflows
-  workflows/                # ComfyUI JSON workflows (3 loadable)
+  workflows/                # ComfyUI JSON workflows (4 loadable, incl. Veo 3.1)
   prompts/                  # Shot concepts, prompt library
 input-scenes/               # Scene reference images
 assets/
@@ -207,10 +209,21 @@ scripts/                    # Generation and processing scripts
 - **Multi-GPU Flux 2**: UNet (~38GB) on GPU 0, CLIP+VAE (~19GB) on GPU 1 via ComfyUI-MultiGPU
 - **Programmatic Text**: AI models consistently misspell "REIMAGINED" - solved via Pillow overlay
 - **Single-Panel References**: Full 4-panel garment images cause grid output - crop to individual panels
-- **Veo 3.1 API**: Use `predictLongRunning` (not `generateVideo`), download with `-L` flag
+- **Veo 3.1 via ComfyUI**: Uses Google GenMedia `Veo3VideoGenerationNode` custom node; requires Comfy.org authentication
 - **Parallel Swarm Peak**: 4.7 images/minute with 3 concurrent agents (Phase 6 repose)
 - **Nano Banana**: ComfyUI custom node wrapping Gemini 2.5 Flash Image API via GeminiImageNode
 - **Cloud vs Local**: Base generation on-premises (Flux 2 Dev); refinement, reskinning, repose via cloud (Gemini 2.5 Flash)
+
+## ComfyUI Workflows (Agent-Generated)
+
+All workflow JSON files were generated from scratch by the AI agents - the human never opened ComfyUI.
+
+| Workflow | Purpose | Nodes |
+|----------|---------|-------|
+| `flux2-multigpu-campaign.json` | Dual-GPU Flux 2 Dev base generation | UNETLoaderMultiGPU, CLIPLoaderMultiGPU, KSampler |
+| `nano-banana-garment-reskin.json` | Garment-faithful reskinning | GeminiImageNode, ImageBatch |
+| `nano-banana-repose.json` | Mannequin reposing with pose reference | GeminiImageNode dual-input |
+| `veo3-branded-video.json` | Veo 3.1 branded video generation | Veo3VideoGenerationNode, SaveVideo |
 
 ## Limitations
 

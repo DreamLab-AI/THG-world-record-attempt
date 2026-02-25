@@ -1,10 +1,10 @@
 {
   "campaign_id": "topshop-ss26-look6",
-  "status": "phase6_completed",
+  "status": "phase7_completed",
   "created_at": "2026-02-25T10:20:00Z",
   "completed_at": null,
   "garment": "WLC OUTFITS 02_02_26 3.jpg",
-  "current_phase": 6,
+  "current_phase": 7,
   "phases": {
     "1_base_generation": {
       "status": "completed",
@@ -110,18 +110,42 @@
       "count": 28,
       "resolution": "864x1184",
       "success_rate": "100%"
+    },
+    "7_branded_veo_films": {
+      "status": "completed",
+      "engine": "Veo 3.1 (veo-3.1-generate-preview) + ffmpeg branding",
+      "started_at": "2026-02-25T13:14:00Z",
+      "completed_at": "2026-02-25T13:27:00Z",
+      "method": "T2V via predictLongRunning with 7-layer cinematic prompts, ffmpeg drawtext branding",
+      "config": {
+        "duration_seconds": 8,
+        "branding": "STYLE REIMAGINED | TOPSHOP SS26",
+        "font": "NotoSans-Bold.ttf",
+        "prompting_framework": "Camera + Lens + Subject + Action + Setting + Lighting + Style"
+      },
+      "videos": [
+        {"id": "greenhouse", "file": "veo_greenhouse.mp4", "resolution": "720x1280", "aspect": "9:16"},
+        {"id": "neon_cityscape", "file": "veo_neon_cityscape.mp4", "resolution": "720x1280", "aspect": "9:16"},
+        {"id": "neon_emerge", "file": "veo_neon_emerge.mp4", "resolution": "1280x720", "aspect": "16:9"},
+        {"id": "mirror_room", "file": "veo_mirror_room.mp4", "resolution": "1280x720", "aspect": "16:9"},
+        {"id": "cherry_blossom", "file": "veo_cherry_blossom.mp4", "resolution": "720x1280", "aspect": "9:16"}
+      ],
+      "count": 5,
+      "success_rate": "100%"
     }
   },
   "metrics": {
-    "total_generated": 133,
-    "total_target": 133,
+    "total_generated": 138,
+    "total_target": 138,
     "phases_1_4_duration_minutes": 30,
     "reskinning_duration_minutes": 22,
     "scene_riffs_duration_minutes": 12,
     "repose_duration_minutes": 6,
-    "total_wall_clock_minutes": 64,
+    "active_generation_minutes": 69,
+    "total_wall_clock_minutes": 96,
+    "branded_video_duration_minutes": 5,
     "voice_prompts": 21,
-    "assets_per_minute": 2.1,
+    "assets_per_minute": 2.0,
     "peak_parallel_rate": 4.7,
     "traditional_baseline_hours": 4,
     "speedup_multiplier": "8-14x"

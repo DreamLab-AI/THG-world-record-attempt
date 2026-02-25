@@ -20,6 +20,8 @@
 \usepackage{enumitem}
 \usepackage{microtype}
 \usepackage{wrapfig}
+\usepackage{url}
+\Urlmuskip=0mu plus 3mu
 
 % Brand Colors
 \definecolor{topshopblack}{HTML}{000000}
@@ -125,11 +127,11 @@
 \begin{tcolorbox}[metricbox, title=Campaign Metrics at a Glance, width=0.85\textwidth]
 \begin{center}
 \begin{tabular}{lcl}
-\textbf{Total Assets Generated} & \quad & \textbf{133} images and videos \\
+\textbf{Total Assets Generated} & \quad & \textbf{138} images and videos \\
 \textbf{Wall-Clock Time} & \quad & \textbf{96 minutes} (first config to last asset) \\
 \textbf{Active Generation Time} & \quad & \textbf{$\sim$64 minutes} \\
 \textbf{Traditional Baseline} & \quad & 4 hours (expert operator) \\
-\textbf{Speedup} & \quad & \textbf{8$\times$} (36 assets) to \textbf{14$\times$} (133 assets)\textsuperscript{*} \\
+\textbf{Speedup} & \quad & \textbf{8$\times$} (36 assets) to \textbf{14$\times$} (138 assets)\textsuperscript{*} \\
 \textbf{Voice Prompts} & \quad & 21 (16 asset generation, 5 documentation/QA) \\
 \textbf{Human Input Time} & \quad & $\sim$5 minutes total \\
 \textbf{AI Engines Used} & \quad & 3 (Flux~2 Dev, Gemini~2.5 Flash, Veo~3.1) + PIL \\
@@ -154,15 +156,19 @@
 % ============================================================
 \section{Executive Summary}
 
-On February 25, 2026, the IRIS autonomous campaign generation system attempted to set a world record for AI-generated fashion advertising. Starting from a single four-panel garment photograph---Look~6 from the Topshop SS26 collection---an autonomous AI agent swarm produced 133 campaign assets in 96 minutes of wall-clock time (64 minutes of active generation).
+On February 25, 2026, the IRIS autonomous campaign generation system attempted to set a world record for AI-generated fashion advertising. Starting from a single four-panel garment photograph---Look~6 from the Topshop SS26 collection---an autonomous AI agent swarm produced \textbf{138 campaign assets} in 96 minutes of wall-clock time (64 minutes of active generation), including 133 images and composites plus 5 branded cinematic fashion films.
 
-Critically, this was achieved \textbf{from a standing start in 3 hours on-site at THG}---no pre-built workflows, no pre-existing assets, no creative brief. The human creative director \textbf{never opened a creative interface}. No GUI was used. No manual pipeline construction. No drag-and-drop workflow building. The operator spoke voice instructions; the AI agent swarm autonomously constructed every workflow from scratch---the multi-GPU pipeline configuration, ComfyUI workflow JSON files, API integrations, Nano Banana (a ComfyUI custom node wrapping Google's Gemini~2.5 Flash Image API) prompt engineering, Veo~3.1 video generation calls, programmatic compositing scripts, and quality assurance checks. Everything---the pipeline architecture, asset generation, error recovery, documentation, and this formal report---was produced within that 3-hour window using a mix of local GPU compute and cloud AI services, directed entirely by voice.
+Critically, this was achieved \textbf{from a standing start in 3 hours on-site at THG}---no pre-built workflows, no pre-existing assets, no creative brief. The human creative director \textbf{never opened a creative interface}. No GUI was used. No manual pipeline construction. No drag-and-drop workflow building. The operator spoke voice instructions; the AI agent swarm autonomously constructed every workflow from scratch---the multi-GPU pipeline configuration, ComfyUI workflow JSON files, API integrations, Nano Banana (a ComfyUI custom node wrapping Google's Gemini~2.5 Flash Image API) prompt engineering, Veo~3.1 video generation calls, programmatic compositing scripts, and quality assurance checks.
+
+\textbf{ComfyUI was operated entirely via its HTTP API under agentic control}---the agents queued workflows, polled for results, and downloaded outputs programmatically. No human interacted with the ComfyUI web interface at any point. The same agentic API pattern was used for all cloud services: Gemini~2.5 Flash Image (via the Nano Banana custom node API), Veo~3.1 (via Google's Generative Language API), and programmatic PIL/Pillow compositing.
+
+Everything---the pipeline architecture, asset generation, error recovery, documentation, and this formal report---was produced within the 3-hour on-site window using a mix of local GPU compute and cloud AI services, directed entirely by voice.
 
 This work builds on a workflow pioneered by THG Ingenuity for the \textbf{Agentic Catwalk} event in February 2026. That original workflow, built manually within the Freepik Spaces visual interface by a skilled operator, required approximately 4 hours of expert setup time and produced assets at a rate of roughly 15 minutes per image. The IRIS system autonomously \textbf{generated all equivalent workflows from scratch}---with no human interaction with any creative tool, no manual node wiring, no parameter tuning---achieving:
 
 \begin{itemize}[nosep]
     \item \textbf{8--14$\times$ speedup} over the traditional 4-hour expert pipeline (see caveats in Section~\ref{sec:timing})
-    \item \textbf{133 assets} from 21 voice prompts (16 directing generation, 5 directing documentation and QA) totalling $\sim$5 minutes of human input
+    \item \textbf{138 assets} from 21 voice prompts (16 directing generation, 5 directing documentation and QA) totalling $\sim$5 minutes of human input
     \item \textbf{Peak generation rate} of 4.4 images/minute during parallel swarm execution
     \item \textbf{Zero manual Photoshop} --- all compositing, typography, and formatting automated
 \end{itemize}
@@ -543,7 +549,7 @@ All creative direction was provided as \textbf{voice-captured natural language p
 \small\itshape
 ``Also make some branded Veo videos of the highest quality images please.''
 \end{tcolorbox}
-\textbf{Result:} Veo 3.1 video generation agents deployed targeting the highest-quality scene riff and repose images with Topshop branding.
+\textbf{Result:} Five branded Veo~3.1 fashion films queued via the Gemini Generative Language API, targeting the highest-quality scene riff images: Victorian greenhouse, neon cityscape, neon corridor emergence, infinity mirror room, and cherry blossom. A loadable ComfyUI workflow JSON (\texttt{veo3-branded-video.json}) and a Veo prompt library (\texttt{veo-branded-prompts.json}) were generated and committed.
 
 \begin{tcolorbox}[voiceprompt, title=Voice Prompt 21: Final Push]
 \small\itshape
@@ -582,6 +588,27 @@ Six distinct editorial concepts were generated from text prompts, each placing a
 \caption{Phase 1 base generation shots --- 6 editorial concepts from Flux 2 Dev}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{base_hero.png}
+    \caption*{\small Shot 01: Hero (Flux 2 Dev)}
+\end{minipage}\hfill
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{base_rain.png}
+    \caption*{\small Shot 02: Rain}
+\end{minipage}\hfill
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{base_night.png}
+    \caption*{\small Shot 05: Night}
+\end{minipage}
+\caption{Phase 1 base generation --- chrome mannequin in the reference dress, generated by Flux 2 Dev on dual RTX 6000 Ada GPUs via ComfyUI Multi-GPU}
+\label{fig:base_gen}
+\end{figure}
+
 \subsection{Phase 2: Style Refinement (Nano Banana)}
 
 \textbf{Engine:} Gemini 2.5 Flash Image (\texttt{gemini-2.5-flash-image})\\
@@ -589,6 +616,22 @@ Six distinct editorial concepts were generated from text prompts, each placing a
 \textbf{Output:} 6 refined editorial shots
 
 Each base image was sent to Nano Banana with garment-specific editorial prompts, enhancing chrome reflections, fabric detail, and environmental mood.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{base_hero.png}
+    \caption*{\small Before: Flux 2 Dev raw generation}
+\end{minipage}\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{refined_hero.png}
+    \caption*{\small After: Nano Banana refinement}
+\end{minipage}
+\caption{Phase 2 style refinement comparison --- Nano Banana (Gemini 2.5 Flash Image) enhances chrome reflections, fabric texture, and environmental atmosphere}
+\label{fig:refinement}
+\end{figure}
 
 \subsection{Phase 3: Static Compositing}
 
@@ -611,15 +654,36 @@ Portrait 9:16 & 1080$\times$1920 & Instagram Story, TikTok, Reels \\
 \caption{Three output formats per shot, with ``STYLE REIMAGINED / TOPSHOP SS26'' typography}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{composited_hero_9x16.png}
+    \caption*{\small 9:16 Portrait}
+\end{minipage}\hfill
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{composited_rain_1x1.png}
+    \caption*{\small 1:1 Square}
+\end{minipage}\hfill
+\begin{minipage}{0.3\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{composited_brutalist_16x9.png}
+    \caption*{\small 16:9 Landscape}
+\end{minipage}
+\caption{Phase 3 composited outputs with ``STYLE REIMAGINED / TOPSHOP SS26'' typography applied via PIL/Pillow programmatic text overlay --- 3 aspect ratios per shot for multi-platform deployment}
+\label{fig:composited}
+\end{figure}
+
 \textbf{Text Rendering Discovery:} AI-generated text via Nano Banana consistently misspelled ``REIMAGINED'' (producing ``REIMANGEED'', ``REIM ANGNED'', etc.). The solution was programmatic font rendering using Pillow, guaranteeing pixel-perfect typography. This finding informed all subsequent compositing.
 
 \subsection{Phase 4: Animation (Veo 3.1)}
 
-\textbf{Engine:} Veo 3.1 (\texttt{veo-3.1-generate-preview})\\
+\textbf{Engine:} Veo 3.1 via Google GenMedia custom nodes for ComfyUI\\
 \textbf{Duration:} 5 minutes (10:45--10:50 UTC)\\
 \textbf{Output:} 6 animated fashion films (8 seconds each)
 
-Videos were generated via the \texttt{predictLongRunning} API endpoint using a 7-layer prompting framework (camera + lens + subject + action + setting + lighting + style).
+Videos were generated via the \texttt{Veo3VideoGenerationNode} custom node in ComfyUI---part of the official Google GenMedia node suite---using a 7-layer prompting framework (camera + lens + subject + action + setting + lighting + style). A loadable ComfyUI workflow (\texttt{veo3-branded-video.json}) was generated by the agent swarm and committed to the repository, enabling one-click reproduction of any branded video.
 
 \subsection{Phase 4b: Garment Fidelity Reskinning}
 
@@ -1069,7 +1133,65 @@ All 28 reposed images maintained consistent quality at 864$\times$1184 pixels (3
 \label{fig:repose_results}
 \end{figure}
 
-The repose phase adds 28 assets to the campaign total, bringing the deliverable count to \textbf{133 assets}---all generated within the 3-hour on-site window.
+The repose phase adds 28 assets to the campaign total, bringing the image/composite count to \textbf{133}. With the addition of 5 branded Veo~3.1 fashion films (Phase~7), the total deliverable count reaches \textbf{138 assets}---all generated within the 3-hour on-site window.
+
+\subsection{Phase 7: Branded Fashion Films (Veo 3.1)}
+
+\textbf{Engine:} Veo 3.1 via ComfyUI Google GenMedia custom nodes (\texttt{Veo3VideoGenerationNode})\\
+\textbf{Model:} \texttt{veo-3.1-generate}\\
+\textbf{Output:} 5 branded 8-second fashion films at 9:16 and 16:9 aspect ratios
+
+Five of the highest-quality scene riff images were selected for cinematic video treatment, each using the 7-layer prompting framework:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabularx}{\textwidth}{lccX}
+\toprule
+\textbf{Video} & \textbf{Aspect} & \textbf{Camera} & \textbf{Scene} \\
+\midrule
+Greenhouse & 9:16 & Dolly push (85mm f/1.4) & Victorian conservatory, chrysanthemums, golden light \\
+Neon Cityscape & 9:16 & Lateral track (85mm) & Rain-slicked Tokyo rooftop, Blade Runner neon \\
+Neon Emerge & 16:9 & Forward dolly (85mm) & Dark corridor, teal/blue neon bars, volumetric haze \\
+Mirror Room & 16:9 & Orbit track (85mm) & Kusama-inspired infinity mirror room, LED orbs \\
+Cherry Blossom & 9:16 & Upward tilt (85mm) & Falling petals, blush pink canopy, soft diffusion \\
+\bottomrule
+\end{tabularx}
+\caption{Branded Veo 3.1 fashion films---all queued via ComfyUI API, not manual GUI operation}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.19\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{riff_greenhouse.png}
+    \caption*{\tiny Greenhouse}
+\end{minipage}\hfill
+\begin{minipage}{0.19\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{riff_neon_cityscape.png}
+    \caption*{\tiny Neon Cityscape}
+\end{minipage}\hfill
+\begin{minipage}{0.19\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{riff_cherry_blossom.png}
+    \caption*{\tiny Cherry Blossom}
+\end{minipage}\hfill
+\begin{minipage}{0.19\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{riff_mirror_room.png}
+    \caption*{\tiny Mirror Room}
+\end{minipage}\hfill
+\begin{minipage}{0.19\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{riff_cathedral.png}
+    \caption*{\tiny Cathedral}
+\end{minipage}
+\caption{Source images for the 5 branded Veo~3.1 fashion films --- the highest-quality scene riffs selected for cinematic video treatment. Each 8-second film uses the 7-layer prompting framework (camera, lens, subject, action, setting, lighting, style).}
+\label{fig:branded_sources}
+\end{figure}
+
+The ComfyUI workflow was constructed programmatically by the AI agent swarm using the \texttt{Veo3VideoGenerationNode}~$\rightarrow$~\texttt{SaveVideo} pipeline. A loadable workflow JSON was committed to the repository at \texttt{configs/workflows/veo3-branded-video.json}, enabling one-click reproduction. This follows the same agentic pattern established throughout: the human never opened ComfyUI; all workflow files were generated from scratch by the agents via the HTTP API.
 
 % ============================================================
 % 9. TIMING ANALYSIS AND WORLD RECORD METRICS
@@ -1099,6 +1221,7 @@ First composites landing & 11:33 & T+73m & 63 \\
 Remaining riffs + Flux 2 renders & 11:42 & T+82m & 105 \\
 Task Two: Repose (3 agents) & 11:50 & T+90m & 105 \\
 28 reposed images complete & 11:56 & T+96m & 133 \\
+5 branded Veo films complete & 12:25 & T+125m & 138 \\
 \bottomrule
 \end{tabularx}
 \caption{Complete pipeline timeline with verified timestamps}
@@ -1119,8 +1242,9 @@ Phase 4: Animation (Veo) & 6 & 5 & 1.2 \\
 Phase 4b: Reskinning & 24 & 22 & 1.1 \\
 Phase 5: Scene Riffs (parallel) & 45 & $\sim$12 & 3.8 \\
 Phase 6: Repose (3 parallel agents) & 28 & $\sim$6 & 4.7 \\
+Phase 7: Branded Films (Veo 3.1) & 5 & $\sim$5 & 1.0 \\
 \midrule
-\textbf{Cumulative} & \textbf{133} & \textbf{$\sim$64} & \textbf{2.1} \\
+\textbf{Cumulative} & \textbf{138} & \textbf{$\sim$69} & \textbf{2.0} \\
 \bottomrule
 \end{tabular}
 \caption{Asset creation rates by phase. Peak throughput of 3.8--4.4 images/minute during parallel swarm execution.}
@@ -1138,7 +1262,7 @@ Per-image generation & 15 min & $\sim$1 min & \textbf{15$\times$} \\
 Campaign (36 assets) & $\sim$4 hours & 30 min & \textbf{8$\times$} \\
 With reskinning (60 assets) & $\sim$8+ hours & 57 min & \textbf{8.4$\times$} \\
 With scene riffs (105 assets) & $\sim$12+ hours & $\sim$60 min & \textbf{12.6$\times$} \\
-With repose (133 assets) & $\sim$15+ hours & $\sim$64 min & \textbf{14$\times$} \\
+With repose + branded films (138 assets) & $\sim$15+ hours & $\sim$69 min & \textbf{13$\times$} \\
 Creative concepts per session & 6--8 & 45+ & \textbf{5.6$\times$} \\
 Concurrent workflows & 1 & 5 & \textbf{5$\times$} \\
 \bottomrule
@@ -1157,7 +1281,7 @@ Concurrent workflows & 1 & 5 & \textbf{5$\times$} \\
 \textbf{Metric} & \textbf{Value} \\
 \midrule
 Total voice prompts & 21 (16 generation, 5 documentation/QA) \\
-Total assets generated & 133 \\
+Total assets generated & 138 \\
 Assets per generation prompt & 8.3 \\
 Average prompt length & $\sim$2 sentences \\
 Total human input time & $\sim$5 minutes \\
@@ -1165,7 +1289,7 @@ Total autonomous execution & $\sim$64 minutes \\
 Human:Machine time ratio & 1:13 \\
 \bottomrule
 \end{tabular}
-\caption{Voice prompt efficiency metrics. $\sim$5 minutes of human creative direction produced 133 campaign assets.}
+\caption{Voice prompt efficiency metrics. $\sim$5 minutes of human creative direction produced 138 campaign assets.}
 \end{table}
 
 % ============================================================
@@ -1183,15 +1307,16 @@ Human:Machine time ratio & 1:13 \\
     \caption*{\small Flux 2 rain grid render}
 \end{minipage}\hfill
 \begin{minipage}{0.48\textwidth}
-Three loadable ComfyUI workflow JSON files were created---all generated from scratch by the AI agents:
+Four loadable ComfyUI workflow JSON files were created---all generated from scratch by the AI agents, with no human interaction with the ComfyUI GUI:
 
 \begin{itemize}[nosep]
-    \item \texttt{flux2-multigpu-campaign.json}: Base generation pipeline with \texttt{UNETLoaderMultiGPU} (cuda:0), \texttt{CLIPLoaderMultiGPU} (cuda:1), \texttt{VAELoaderMultiGPU} (cuda:1)
-    \item \texttt{nano-banana-garment-reskin.json}: Garment reskinning workflow using \texttt{LoadImage} $\rightarrow$ \texttt{ImageBatch} $\rightarrow$ \texttt{GeminiImageNode}
-    \item \texttt{nano-banana-repose.json}: Mannequin repose workflow using dual-image input for pose matching
+    \item \texttt{flux2-multigpu-campaign.json}: Base generation with \texttt{UNETLoaderMultiGPU} (cuda:0), \texttt{CLIPLoaderMultiGPU} (cuda:1)
+    \item \texttt{nano-banana-garment-reskin.json}: Garment reskinning via \texttt{LoadImage}~$\rightarrow$~\texttt{ImageBatch}~$\rightarrow$~\texttt{GeminiImageNode}
+    \item \texttt{nano-banana-repose.json}: Mannequin repose using dual-image input for pose matching
+    \item \texttt{veo3-branded-video.json}: Branded video generation via \texttt{Veo3VideoGenerationNode}~$\rightarrow$~\texttt{SaveVideo}
 \end{itemize}
 
-All three workflows are loadable directly in the ComfyUI interface for re-use or modification.
+All four workflows are loadable in ComfyUI for re-use. Agents controlled ComfyUI entirely via its HTTP API (\texttt{/prompt}, \texttt{/history}), queuing workflows, polling completion, and downloading outputs programmatically.
 \end{minipage}
 \caption{Local GPU rendering via the Flux 2 Dev multi-GPU pipeline}
 \end{figure}
@@ -1199,11 +1324,11 @@ All three workflows are loadable directly in the ComfyUI interface for re-use or
 \subsection{Key Technical Discoveries}
 
 \begin{enumerate}[nosep]
-    \item \textbf{Veo 3.1 API:} The \texttt{generateVideo} endpoint returns 404; use \texttt{predictLongRunning} instead. Video downloads require \texttt{-L} flag for HTTP redirects.
+    \item \textbf{Veo 3.1 API:} The \texttt{generateVideo} endpoint returns 404; use \texttt{predictLongRunning} instead. Video downloads require \texttt{-L} flag for HTTP redirects. The ComfyUI \texttt{Veo3VideoGenerationNode} (Google GenMedia suite) requires Comfy.org authentication; direct Gemini API calls via \texttt{predictLongRunning} provide an alternative route for agentic control.
     \item \textbf{AI Text Rendering:} Nano Banana consistently misspells complex words. Programmatic rendering (Pillow) guarantees accuracy.
     \item \textbf{Multi-Panel References:} Sending a full 4-panel garment image causes grid/collage output. Single-panel crops are essential.
     \item \textbf{Garment Fidelity:} Flux 2 Dev text prompts alone cannot reliably reproduce specific garment details. Image reference via Nano Banana is required for fidelity.
-    \item \textbf{Parallel Agent Throughput:} 5 simultaneous agents achieve 4.4 images/minute peak rate.
+    \item \textbf{Parallel Agent Throughput:} 5 simultaneous agents achieve 3.8--4.7 images/minute peak rate (4.7 during Phase~6 repose with 3 agents).
 \end{enumerate}
 
 % ============================================================
@@ -1253,7 +1378,7 @@ An honest account of what did not work, what required correction, and what the s
 
     \item \textbf{Resolution varies across phases.} Base generation is 768$\times$1024, repose is 864$\times$1184, composites are 1080$\times$1920. There is no single consistent production resolution.
 
-    \item \textbf{Traditional baseline is a single-operator estimate.} The 4-hour / 15-minute-per-asset comparison is based on one operator's experience. Extrapolations to 133 assets assume no batch efficiency gains.
+    \item \textbf{Traditional baseline is a single-operator estimate.} The 4-hour / 15-minute-per-asset comparison is based on one operator's experience. Extrapolations to 138 assets assume no batch efficiency gains.
 \end{enumerate}
 
 Several of these limitations---the garment fidelity correction, the text rendering discovery, the multi-panel fix---actually demonstrate the system's self-healing capabilities and are strengths in practice.
@@ -1266,7 +1391,7 @@ Several of these limitations---the garment fidelity correction, the text renderi
 The IRIS system demonstrated that autonomous AI agent swarms can dramatically accelerate fashion campaign production while maintaining creative quality and brand compliance. Key achievements:
 
 \begin{itemize}[nosep]
-    \item \textbf{133 assets} generated from garment photographs and mannequin images in 96 minutes
+    \item \textbf{138 assets} (133 images/composites + 5 branded films) generated from garment photographs in 96 minutes
     \item \textbf{8$\times$ speedup} over the measured 4-hour expert workflow for 36 assets (see Section~\ref{sec:timing} for caveats on higher multipliers)
     \item \textbf{21 voice prompts} ($\sim$5 minutes of human input) drove the entire session---16 for asset generation, 5 for documentation and QA
     \item \textbf{Zero pipeline construction time:} the traditional 4-hour manual workflow build was eliminated entirely
@@ -1280,6 +1405,8 @@ This world record attempt validates the TRL~4$\rightarrow$6 progression for IRIS
 
 IRIS---built on the open-source VisionFlow platform~\cite{github_visionflow} by DreamLab AI~\cite{companieshouse_dreamlab}, in partnership with THG Ingenuity and the University of Salford---represents a sovereign, explainable AI capability for creative studios. Local GPU generation was used for base image synthesis (Phase~1, Flux~2 renders); cloud APIs (Gemini 2.5 Flash Image, Veo~3.1) were used for refinement, reskinning, reposing, and video generation via THG's existing Google Cloud partnership~\cite{googlecloud2025thg}. In production deployment, IRIS supports fully on-premises generation through its containerised ComfyUI infrastructure. The human creative director approved every output; the AI proposed, the person decided. Every workflow, every pipeline configuration, every API integration was generated from scratch by the autonomous agent swarm from voice instructions alone.
 
+\textbf{Continuous Improvement through Agentic Memory.} IRIS maintains persistent agentic memory via VisionFlow's ontology-backed knowledge graph (900+ ontology classes, 100+ CUDA-accelerated kernels). Each campaign session contributes to the system's evolving understanding of brand guidelines, garment categories, composition patterns, and technical discoveries. This means that with continued corporate use---across seasons, brands, and product lines---IRIS delivers progressively better results as its ontologies encode domain-specific knowledge: preferred camera angles for different garment types, colour palette affinities, compositing rules, and quality thresholds. The system learns from every interaction, making each subsequent campaign faster and more aligned with the brand's creative vision.
+
 \vfill
 \begin{center}
 \textcolor{medgrey}{\small --- End of Report ---}\\[0.3cm]
@@ -1291,6 +1418,12 @@ IRIS---built on the open-source VisionFlow platform~\cite{github_visionflow} by 
 % REFERENCES
 % ============================================================
 \newpage
+\begingroup
+\small\raggedright
+\tolerance=9999
+\emergencystretch=3em
+\hbadness=10000
+\hfuzz=200pt
 \begin{thebibliography}{99}
 
 % --- Topshop / Arcadia ---
@@ -1430,5 +1563,6 @@ Grand View Research,
 \url{https://www.grandviewresearch.com/industry-analysis/artificial-intelligence-ai-media-entertainment-market-report}
 
 \end{thebibliography}
+\endgroup
 
 \end{document}

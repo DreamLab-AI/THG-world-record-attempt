@@ -1,0 +1,73 @@
+{
+  "last_node_id": 2,
+  "last_link_id": 1,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "Veo3VideoGenerationNode",
+      "pos": [200, 200],
+      "size": [400, 300],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {
+          "name": "VIDEO",
+          "type": "VIDEO",
+          "links": [1],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Veo3VideoGenerationNode"
+      },
+      "widgets_values": [
+        "Slow dolly push forward on an 85mm f/1.4 lens, shallow depth of field. A polished chrome mannequin wearing a cream sleeveless maxi dress with delicate black ink botanical chrysanthemum illustrations on the bodice and thin vertical pinstripes on the flowing A-line skirt stands centered in a grand Victorian greenhouse conservatory. The dress fabric sways gently in a warm draft, hem rippling subtly. Real chrysanthemum flowers in terracotta pots line iron-framed glass shelves on both sides. Warm golden afternoon sunlight streams through the glass roof panels, casting dappled botanical shadows across the cream fabric. Dust motes and pollen particles drift lazily through sunbeams. Condensation beads on glass panes. Style: High-fashion editorial, cinematic, Vogue Italia. Rich color grading with warm amber tones and jade green accents. No text, no subtitles, no watermarks. 8 seconds.",
+        "9:16",
+        "",
+        8,
+        true,
+        "ALLOW",
+        0,
+        "veo-3.1-generate",
+        false
+      ]
+    },
+    {
+      "id": 2,
+      "type": "SaveVideo",
+      "pos": [700, 200],
+      "size": [300, 150],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/veo_branded",
+        "mp4",
+        "h264"
+      ]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 2, 0, "VIDEO"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}

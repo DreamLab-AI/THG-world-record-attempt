@@ -4,7 +4,10 @@
   "method": "predictLongRunning (text-to-video)",
   "duration_seconds": 8,
   "branding": "STYLE REIMAGINED | TOPSHOP SS26",
-  "generated_at": "2026-02-25T13:12:53Z",
+  "generated_at": "2026-02-25T13:23:51Z",
+  "generation_status": "all_5_completed",
+  "branding_method": "ffmpeg drawtext overlay (NotoSans-Bold.ttf)",
+  "branding_timing": "visible between t=1s and t=7.5s",
   "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning",
   "videos": [
     {
