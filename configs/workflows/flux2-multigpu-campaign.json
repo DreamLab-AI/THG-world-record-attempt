@@ -1,0 +1,195 @@
+{
+  "last_node_id": 9,
+  "last_link_id": 8,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoaderMultiGPU",
+      "pos": [100, 100],
+      "size": [315, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "UNETLoaderMultiGPU"},
+      "widgets_values": ["flux2_dev_fp8mixed.safetensors", "default", "cuda:0"],
+      "title": "Flux 2 UNet (GPU 0)"
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoaderMultiGPU",
+      "pos": [100, 260],
+      "size": [315, 82],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "CLIP", "type": "CLIP", "links": [2, 3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPLoaderMultiGPU"},
+      "widgets_values": ["mistral_3_small_flux2_fp8.safetensors", "flux2", "cuda:1"],
+      "title": "Mistral CLIP (GPU 1)"
+    },
+    {
+      "id": 3,
+      "type": "CLIPTextEncode",
+      "pos": [500, 100],
+      "size": [400, 200],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [4], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["Professional fashion editorial photograph. A chrome mannequin wearing a cream sleeveless maxi dress with thin vertical pinstripes on the flowing A-line skirt and delicate black ink botanical illustrations on the bodice featuring chrysanthemum flowers and bird silhouettes. Thin chain link straps. The mannequin stands on wet brutalist concrete. Overcast diffused lighting, reflections on wet ground. High-end Topshop SS26 campaign. Shot on medium format camera, shallow depth of field."],
+      "title": "Positive Prompt"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [500, 360],
+      "size": [400, 100],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 3}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [5], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": [""],
+      "title": "Negative Prompt (empty for Flux 2)"
+    },
+    {
+      "id": 5,
+      "type": "EmptySD3LatentImage",
+      "pos": [500, 520],
+      "size": [315, 106],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "EmptySD3LatentImage"},
+      "widgets_values": [1024, 1024, 1],
+      "title": "Latent (1024x1024)"
+    },
+    {
+      "id": 6,
+      "type": "KSampler",
+      "pos": [980, 100],
+      "size": [315, 262],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 4},
+        {"name": "negative", "type": "CONDITIONING", "link": 5},
+        {"name": "latent_image", "type": "LATENT", "link": 6}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [7], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [42, "randomize", 20, 1.0, "euler", "simple", 1.0],
+      "title": "KSampler (20 steps, euler)"
+    },
+    {
+      "id": 7,
+      "type": "VAELoaderMultiGPU",
+      "pos": [980, 440],
+      "size": [315, 58],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "outputs": [
+        {"name": "VAE", "type": "VAE", "links": [8], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAELoaderMultiGPU"},
+      "widgets_values": ["flux2-vae.safetensors", "cuda:1"],
+      "title": "Flux 2 VAE (GPU 1)"
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [1370, 200],
+      "size": [210, 46],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 7},
+        {"name": "vae", "type": "VAE", "link": 8}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [9], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"},
+      "title": "VAE Decode"
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [1370, 320],
+      "size": [315, 270],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 9}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["topshop_ss26_"],
+      "title": "Save Campaign Image"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 6, 0, "MODEL"],
+    [2, 2, 0, 3, 0, "CLIP"],
+    [3, 2, 0, 4, 0, "CLIP"],
+    [4, 3, 0, 6, 1, "CONDITIONING"],
+    [5, 4, 0, 6, 2, "CONDITIONING"],
+    [6, 5, 0, 6, 3, "LATENT"],
+    [7, 6, 0, 8, 0, "LATENT"],
+    [8, 7, 0, 8, 1, "VAE"],
+    [9, 8, 0, 9, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Topshop SS26 - Flux 2 Dev Multi-GPU Campaign Generator",
+      "bounding": [60, 40, 1680, 620],
+      "color": "#3f789e",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 0.9, "offset": [0, 0]},
+    "manual_config": {
+      "description": "Flux 2 Dev base generation workflow for Topshop SS26 campaign using dual RTX 6000 Ada GPUs via ComfyUI-MultiGPU.",
+      "gpu_distribution": {
+        "cuda:0": "UNet (flux2_dev_fp8mixed.safetensors, ~17.5GB)",
+        "cuda:1": "CLIP (mistral_3_small_flux2_fp8.safetensors, ~9GB) + VAE (flux2-vae.safetensors, ~336MB)"
+      },
+      "recommended_settings": {
+        "steps": 20,
+        "cfg": 1.0,
+        "sampler": "euler",
+        "scheduler": "simple",
+        "resolution": "1024x1024 or 1248x832 (landscape)"
+      },
+      "requires": "ComfyUI-MultiGPU custom node installed, both GPUs visible via CUDA"
+    }
+  },
+  "version": 0.4
+}

@@ -1,0 +1,129 @@
+{
+  "last_node_id": 6,
+  "last_link_id": 4,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [100, 100],
+      "size": [315, 314],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [1], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["look6_front.jpg", "image"],
+      "title": "Garment Reference (Front Panel)"
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [100, 480],
+      "size": [315, 314],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [2], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["campaign_shot01_hero_00001_.png", "image"],
+      "title": "Campaign Scene Image"
+    },
+    {
+      "id": 3,
+      "type": "ImageBatch",
+      "pos": [500, 280],
+      "size": [210, 46],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "image1", "type": "IMAGE", "link": 1},
+        {"name": "image2", "type": "IMAGE", "link": 2}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "ImageBatch"},
+      "title": "Batch Reference + Scene"
+    },
+    {
+      "id": 4,
+      "type": "GeminiImageNode",
+      "pos": [780, 100],
+      "size": [400, 400],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 3}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [4], "slot_index": 0},
+        {"name": "TEXT", "type": "STRING", "links": null}
+      ],
+      "properties": {"Node name for S&R": "GeminiImageNode"},
+      "widgets_values": [
+        "I am giving you two images:\n\nIMAGE 1 (reference garment): A photograph of the exact dress to use as reference. It has THIN VERTICAL PINSTRIPES on the skirt (narrow evenly-spaced vertical lines that follow the drape of the A-line skirt). The bodice has delicate sketchy black ink botanical illustrations featuring chrysanthemums, bird silhouettes, and flowing stems. The straps are thin chain links. The fabric is natural warm cream/beige.\n\nIMAGE 2 (campaign scene): A fashion campaign photo showing a chrome mannequin in an editorial setting.\n\nYOUR TASK: Generate a SINGLE fashion campaign photograph. Take the mannequin and scene from IMAGE 2 and dress it in the EXACT garment from IMAGE 1.\n\nCRITICAL REQUIREMENTS:\n1. THIN VERTICAL PINSTRIPES on the skirt - the most important detail\n2. Delicate sketchy ink botanical illustrations on the bodice\n3. Thin chain link straps\n4. Natural warm cream fabric tone\n5. Flowing A-line maxi silhouette\n\nOutput ONE image only (not a grid or collage). Maintain the exact scene, lighting, mannequin, and environment from IMAGE 2. Only replace the garment.",
+        "gemini-2.5-flash-image",
+        42,
+        "auto",
+        "IMAGE"
+      ],
+      "title": "Nano Banana Garment Reskin"
+    },
+    {
+      "id": 5,
+      "type": "SaveImage",
+      "pos": [1260, 200],
+      "size": [315, 270],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 4}
+      ],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["reskin_topshop_"],
+      "title": "Save Reskinned Output"
+    }
+  ],
+  "links": [
+    [1, 1, 0, 3, 0, "IMAGE"],
+    [2, 2, 0, 3, 1, "IMAGE"],
+    [3, 3, 0, 4, 0, "IMAGE"],
+    [4, 4, 0, 5, 0, "IMAGE"]
+  ],
+  "groups": [
+    {
+      "title": "Topshop SS26 - Nano Banana Garment Reskin Workflow",
+      "bounding": [60, 40, 1560, 810],
+      "color": "#3f789e",
+      "font_size": 24
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 1, "offset": [0, 0]},
+    "manual_config": {
+      "description": "Garment reskinning workflow for Topshop SS26 campaign. Uses Nano Banana (Gemini 2.5 Flash Image) to replace AI-generated garments with the exact reference dress.",
+      "usage": [
+        "1. Set 'Garment Reference' to the cropped front panel of the garment (look6_front.jpg)",
+        "2. Set 'Campaign Scene Image' to any campaign shot to reskin",
+        "3. For back views, swap the reference to look6_back.jpg",
+        "4. Adjust the prompt for scene-specific details",
+        "5. Change seed for variations",
+        "6. Queue prompt to generate"
+      ],
+      "requires": "GOOGLE_API_KEY environment variable set in ComfyUI container",
+      "models_used": "gemini-2.5-flash-image (Nano Banana)",
+      "garment": "Cream sleeveless maxi - thin vertical pinstripes, botanical ink bodice, chain link straps"
+    }
+  },
+  "version": 0.4
+}
