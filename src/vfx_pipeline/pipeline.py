@@ -1,449 +1,91 @@
-"""End-to-end 3D VFX Object Tracking Pipeline.
+"""VFX Object Tracking Pipeline v2.
+
+Generates a 3D model from a screenshot (Hunyuan3D via ComfyUI), imports it
+into Blender, tracks it against video footage using GeoTracker, and composites
+the result.
+
+Based on the official KeenTools tutorial workflow:
+    1. Generate 3D model from screenshot (Hunyuan3D v2 or pre-made GLB)
+    2. Import GLB into Blender, fix rotation/parents (tutorial-critical)
+    3. Configure GeoTracker, analyze clip, align model
+    4. Track with pins, refine, bake animation
+    5. Composite tracked mesh over video, render frames
 
 Usage:
-    python -m vfx_pipeline.pipeline \\
-        --video /path/to/video.mp4 \\
-        --prompt "the red car" \\
-        --output /tmp/vfx_output
+    python -m vfx_pipeline \\
+        --video footage.mp4 \\
+        --screenshot object.png \\
+        --output /tmp/vfx_out
 
-Pipeline:
-    1. SAM3 text-prompted segmentation (ComfyUI)
-    2. SAM3D 3D reconstruction (ComfyUI)
-    3. GeoTracker match-move (Blender MCP)
-    4. VFX compositing + render (Blender MCP)
+    # With pre-made GLB (skip generation):
+    python -m vfx_pipeline \\
+        --video footage.mp4 \\
+        --glb model.glb \\
+        --output /tmp/vfx_out
+
+    # Using KeenTools example files:
+    python -m vfx_pipeline \\
+        --video assets/keentools-example/ComfyUI+GeoTracker_example/5835604-hd_1920_1080_25fps.mp4 \\
+        --glb assets/keentools-example/ComfyUI+GeoTracker_example/Car.glb \\
+        --output /tmp/vfx_test
 """
 
 import argparse
 import json
 import os
-import shutil
-import sys
 import time
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from .comfyui_client import ComfyUIClient
 from .blender_client import BlenderClient
+from .blender_scripts import (
+    ANALYZE_CLIP,
+    CHECK_SCENE_STATE,
+    ENTER_PINMODE_AND_ALIGN,
+    IMPORT_AND_PREPARE_GLB,
+    LOAD_FOOTAGE,
+    RENDER_ANIMATION,
+    RESET_AND_CREATE_GEOTRACKER,
+    SAVE_BLEND,
+    SETUP_COMPOSITOR,
+    SETUP_GEOTRACKER,
+    TRACK_AND_REFINE,
+)
+from .comfyui_client import ComfyUIClient
+from .validators import (
+    validate_composite_output,
+    validate_glb,
+    validate_scene_setup,
+    validate_tracking,
+)
 from .workflows import (
-    build_sam3_segmentation,
-    build_sam3_video_segmentation,
-    build_sam3d_reconstruction,
+    build_hunyuan3d_generation,
+    load_reference_workflow,
+    patch_workflow_image,
 )
-import glob as globmod
 
 
 # ---------------------------------------------------------------------------
-# Blender Python scripts (executed via MCP execute_python)
+# Data classes
 # ---------------------------------------------------------------------------
 
-BLENDER_RESET_SCENE = """
-import bpy
-# Clear default scene
-bpy.ops.wm.read_homefile(use_empty=True)
-# Ensure keentools addon is enabled
-try:
-    bpy.ops.preferences.addon_enable(module='keentools')
-    print("KeenTools addon enabled")
-except Exception as e:
-    print(f"KeenTools enable: {e}")
-print("Scene reset complete")
-"""
 
-BLENDER_IMPORT_GLB = """
-import bpy
-filepath = "{glb_path}"
-bpy.ops.import_scene.gltf(filepath=filepath)
-# Get imported objects
-imported = [o for o in bpy.context.selected_objects]
-print(f"Imported {{len(imported)}} objects from {{filepath}}")
-for obj in imported:
-    print(f"  - {{obj.name}} ({{obj.type}})")
-# Select the mesh object
-meshes = [o for o in imported if o.type == 'MESH']
-if meshes:
-    bpy.context.view_layer.objects.active = meshes[0]
-    print(f"Active mesh: {{meshes[0].name}}")
-str(len(imported))
-"""
+@dataclass
+class StepResult:
+    ok: bool
+    message: str
+    data: dict = field(default_factory=dict)
+    duration_seconds: float = 0.0
 
-BLENDER_LOAD_VIDEO_CLIP = """
-import bpy
-video_path = "{video_path}"
-# Load as movie clip for tracking
-clip = bpy.data.movieclips.load(video_path)
-print(f"Loaded clip: {{clip.name}}, {{clip.size[0]}}x{{clip.size[1]}}, {{clip.frame_duration}} frames")
-# Also set scene frame range to match
-bpy.context.scene.frame_start = 1
-bpy.context.scene.frame_end = clip.frame_duration
-bpy.context.scene.render.fps = 24
-print(f"Scene: frames 1-{{clip.frame_duration}}, 24fps")
-str(clip.frame_duration)
-"""
 
-BLENDER_SETUP_GEOTRACKER = """
-import bpy
-
-# Get the mesh object (first mesh in scene)
-mesh_obj = None
-for obj in bpy.data.objects:
-    if obj.type == 'MESH':
-        mesh_obj = obj
-        break
-
-if not mesh_obj:
-    raise ValueError("No mesh object found in scene")
-
-# Get the movie clip
-clip = None
-for c in bpy.data.movieclips:
-    clip = c
-    break
-
-if not clip:
-    raise ValueError("No movie clip loaded")
-
-print(f"Setting up GeoTracker: mesh={mesh_obj.name}, clip={clip.name}")
-
-# Create GeoTracker
-try:
-    bpy.ops.keentools_gt.create_geotracker()
-    print("GeoTracker created")
-except Exception as e:
-    print(f"Create GeoTracker: {e}")
-
-# Access GeoTracker settings (API uses geotrackers collection + current_geotracker_num)
-gt_settings = bpy.context.scene.keentools_gt_settings
-gt_idx = gt_settings.current_geotracker_num
-gt = gt_settings.geotrackers[gt_idx]
-
-# Set up camera first (GeoTracker needs it)
-cam = bpy.data.objects.get('Camera')
-if not cam:
-    bpy.ops.object.camera_add(location=(0, -5, 2))
-    cam = bpy.context.active_object
-    cam.name = 'Camera'
-bpy.context.scene.camera = cam
-
-# Assign geometry, clip, and camera to GeoTracker
-gt.geomobj = mesh_obj
-gt.camobj = cam
-gt.movie_clip = clip
-
-# Match render resolution to clip
-bpy.context.scene.render.resolution_x = clip.size[0]
-bpy.context.scene.render.resolution_y = clip.size[1]
-
-print(f"GeoTracker configured: {mesh_obj.name} tracking in {clip.name}")
-print(f"Resolution: {clip.size[0]}x{clip.size[1]}")
-str("ready")
-"""
-
-BLENDER_GT_START_TRACKING = """
-import bpy, time
-
-# Enable precalcless mode
-gt_settings = bpy.context.scene.keentools_gt_settings
-gt = gt_settings.geotrackers[gt_settings.current_geotracker_num]
-gt.precalcless = True
-
-# Find 3D viewport
-for window in bpy.context.window_manager.windows:
-    for area in window.screen.areas:
-        if area.type == 'VIEW_3D':
-            for region in area.regions:
-                if region.type == 'WINDOW':
-                    with bpy.context.temp_override(window=window, area=area, region=region):
-                        bpy.ops.view3d.view_camera()
-                        time.sleep(0.5)
-                        bpy.ops.keentools_gt.pinmode('INVOKE_DEFAULT')
-                        time.sleep(1)
-                        bpy.ops.keentools_gt.magic_keyframe_btn()
-                        time.sleep(1)
-                        bpy.ops.keentools_gt.track_to_end_btn()
-                    break
-            break
-
-print("Tracking started")
-str("started")
-"""
-
-BLENDER_GT_CHECK_STATUS = """
-import bpy
-gt_settings = bpy.context.scene.keentools_gt_settings
-mode = gt_settings.calculating_mode
-pct = gt_settings.user_percent
-if mode and mode != 'NONE':
-    print(f"TRACKING: {mode} {pct:.0f}%")
-else:
-    print("IDLE")
-str(mode)
-"""
-
-BLENDER_GT_BAKE_AND_EXIT = """
-import bpy
-
-# Find 3D viewport for context
-for window in bpy.context.window_manager.windows:
-    for area in window.screen.areas:
-        if area.type == 'VIEW_3D':
-            for region in area.regions:
-                if region.type == 'WINDOW':
-                    with bpy.context.temp_override(window=window, area=area, region=region):
-                        # Exit pinmode
-                        try:
-                            bpy.ops.keentools_gt.exit_pinmode_btn()
-                            print("Exited pinmode")
-                        except:
-                            pass
-
-                        # Bake animation to world space
-                        try:
-                            bpy.ops.keentools_gt.bake_animation_to_world(product=1)
-                            print("Animation baked to world space")
-                        except Exception as e:
-                            print(f"Bake: {e}")
-                            # Fallback: manually keyframe the mesh
-                            try:
-                                mesh = None
-                                for obj in bpy.data.objects:
-                                    if obj.type == 'MESH':
-                                        mesh = obj
-                                        break
-                                if mesh:
-                                    mesh.keyframe_insert(data_path='location', frame=1)
-                                    mesh.keyframe_insert(data_path='rotation_euler', frame=1)
-                                    print("Manual keyframe fallback applied")
-                            except Exception as e2:
-                                print(f"Manual keyframe: {e2}")
-                    break
-            break
-
-str("baked")
-"""
-
-BLENDER_RUN_GEOTRACKER = """
-import bpy
-import time
-
-print("Starting GeoTracker solve...")
-
-# Enable precalcless mode (skip video analysis for scripted tracking)
-gt_settings = bpy.context.scene.keentools_gt_settings
-gt_idx = gt_settings.current_geotracker_num
-gt = gt_settings.geotrackers[gt_idx]
-gt.precalcless = True
-print("Enabled precalcless mode")
-
-# Find the 3D viewport for context override
-view3d_area = None
-view3d_region = None
-for window in bpy.context.window_manager.windows:
-    for area in window.screen.areas:
-        if area.type == 'VIEW_3D':
-            view3d_area = area
-            for region in area.regions:
-                if region.type == 'WINDOW':
-                    view3d_region = region
-                    break
-            break
-
-if not view3d_area:
-    raise RuntimeError("No 3D viewport found")
-
-# All GeoTracker ops need to run inside context override
-with bpy.context.temp_override(
-    window=bpy.context.window_manager.windows[0],
-    area=view3d_area,
-    region=view3d_region,
-):
-    # Switch to camera view
-    bpy.ops.view3d.view_camera()
-    time.sleep(0.5)
-
-    # Enter pinmode (required for tracking)
-    try:
-        bpy.ops.keentools_gt.pinmode('INVOKE_DEFAULT')
-        print("Entered Pinmode")
-        time.sleep(2)
-    except Exception as e:
-        print(f"Pinmode enter: {e}")
-
-    # Magic keyframe for initial alignment
-    try:
-        bpy.ops.keentools_gt.magic_keyframe_btn()
-        print("Magic keyframe placed")
-        time.sleep(1)
-    except Exception as e:
-        print(f"Magic keyframe: {e}")
-
-    # Track forward through video
-    try:
-        bpy.ops.keentools_gt.track_to_end_btn()
-        print("Track to end started...")
-        # Wait for async tracking to complete
-        for i in range(120):
-            time.sleep(5)
-            if not gt_settings.calculating_mode or gt_settings.calculating_mode == 'NONE':
-                break
-            pct = gt_settings.user_percent
-            print(f"  Tracking: {pct:.0f}%")
-        print("Tracking complete")
-    except Exception as e:
-        print(f"Track to end: {e}")
-
-    # Refine tracking
-    try:
-        bpy.ops.keentools_gt.refine_all_btn()
-        print("Refine started...")
-        for i in range(60):
-            time.sleep(5)
-            if not gt_settings.calculating_mode or gt_settings.calculating_mode == 'NONE':
-                break
-            pct = gt_settings.user_percent
-            print(f"  Refining: {pct:.0f}%")
-        print("Refinement complete")
-    except Exception as e:
-        print(f"Refine: {e}")
-
-    # Exit pinmode
-    try:
-        bpy.ops.keentools_gt.exit_pinmode_btn()
-        print("Exited Pinmode")
-    except Exception as e:
-        print(f"Exit pinmode: {e}")
-
-# Bake animation to world space (product=1 = GEOTRACKER)
-try:
-    bpy.ops.keentools_gt.bake_animation_to_world(product=1)
-    print("Animation baked to world space")
-except Exception as e:
-    print(f"Bake animation: {e}")
-
-print("GeoTracker solve complete")
-str("tracked")
-"""
-
-BLENDER_EXPORT_TRACKING = """
-import bpy
-
-output_path = "{output_path}"
-
-# Export as Alembic (.abc) for tracked animation
-abc_path = output_path + "/tracked_animation.abc"
-bpy.ops.wm.alembic_export(
-    filepath=abc_path,
-    start=bpy.context.scene.frame_start,
-    end=bpy.context.scene.frame_end,
-    selected=False,
-)
-print(f"Exported Alembic: {{abc_path}}")
-str(abc_path)
-"""
-
-BLENDER_ENSURE_LIGHTING = """
-import bpy
-scene = bpy.context.scene
-# Add sun light if none exists
-has_light = any(o.type == 'LIGHT' for o in bpy.data.objects)
-if not has_light:
-    bpy.ops.object.light_add(type='SUN', location=(5, -5, 10))
-    bpy.context.active_object.data.energy = 3.0
-    print("Added sun light")
-else:
-    print("Light already exists")
-str("ok")
-"""
-
-BLENDER_SETUP_COMPOSITOR = """
-import bpy, os
-
-video_path = "{video_path}"
-output_path = "{output_path}"
-
-scene = bpy.context.scene
-scene.use_nodes = True
-
-# Blender 5.x: scene.node_tree replaced by scene.compositing_node_group
-cng = scene.compositing_node_group
-if cng is None:
-    cng = bpy.data.node_groups.new("Compositing", "CompositorNodeTree")
-    scene.compositing_node_group = cng
-
-# Clear existing nodes and interface sockets
-for node in list(cng.nodes):
-    cng.nodes.remove(node)
-for item in list(cng.interface.items_tree):
-    cng.interface.remove(item)
-
-# Create output socket (replaces CompositorNodeComposite in 5.x)
-cng.interface.new_socket(name="Image", in_out="OUTPUT", socket_type="NodeSocketColor")
-
-# Create nodes
-clip_node = cng.nodes.new("CompositorNodeMovieClip")
-render_layer = cng.nodes.new("CompositorNodeRLayers")
-alpha_over = cng.nodes.new("CompositorNodeAlphaOver")
-group_output = cng.nodes.new("NodeGroupOutput")
-viewer = cng.nodes.new("CompositorNodeViewer")
-
-clip_node.location = (-400, 200)
-render_layer.location = (-400, -200)
-alpha_over.location = (0, 0)
-group_output.location = (400, 100)
-viewer.location = (400, -100)
-
-# Set movie clip
-clip = None
-for c in bpy.data.movieclips:
-    clip = c
-    break
-if not clip:
-    clip = bpy.data.movieclips.load(video_path)
-if clip:
-    clip_node.clip = clip
-
-# Blender 5.x AlphaOver inputs: [0]=Background, [1]=Foreground, [2]=Factor
-cng.links.new(clip_node.outputs["Image"], alpha_over.inputs["Background"])
-cng.links.new(render_layer.outputs["Image"], alpha_over.inputs["Foreground"])
-cng.links.new(alpha_over.outputs["Image"], group_output.inputs["Image"])
-cng.links.new(alpha_over.outputs["Image"], viewer.inputs["Image"])
-
-# Ensure world exists for EEVEE lighting
-if not scene.world:
-    world = bpy.data.worlds.new("World")
-    world.use_nodes = True
-    bg = world.node_tree.nodes["Background"]
-    bg.inputs["Color"].default_value = (0.8, 0.8, 0.8, 1)
-    bg.inputs["Strength"].default_value = 1.0
-    scene.world = world
-
-# Render settings (Blender 5.x: BLENDER_EEVEE, PNG frames)
-scene.render.engine = "BLENDER_EEVEE"
-scene.render.resolution_x = clip.size[0] if clip else 1920
-scene.render.resolution_y = clip.size[1] if clip else 1080
-scene.render.fps = 24
-scene.render.image_settings.file_format = "PNG"
-scene.render.image_settings.color_mode = "RGBA"
-scene.render.filepath = output_path + "/composited_"
-scene.render.film_transparent = True
-
-os.makedirs(output_path, exist_ok=True)
-
-print(f"Compositor setup complete")
-print(f"Output: {{scene.render.filepath}}")
-str("compositor_ready")
-"""
-
-BLENDER_RENDER = """
-import bpy
-print("Starting render...")
-bpy.ops.render.render(animation=True)
-print("Render complete: " + bpy.context.scene.render.filepath)
-str("rendered")
-"""
+# ---------------------------------------------------------------------------
+# Pipeline
+# ---------------------------------------------------------------------------
 
 
 class VFXPipeline:
-    """Orchestrates the full SAM3 → SAM3D → GeoTracker → Compositing pipeline."""
+    """Orchestrates the full Hunyuan3D → GeoTracker → Compositing pipeline."""
 
     def __init__(
         self,
@@ -452,7 +94,7 @@ class VFXPipeline:
     ):
         self.comfy = ComfyUIClient(comfyui_url)
         self.blender_url = blender_url
-        self.output_dir = None
+        self.output_dir: Optional[Path] = None
 
     def _ensure_output_dir(self, output_path: str) -> Path:
         p = Path(output_path)
@@ -461,191 +103,296 @@ class VFXPipeline:
         return p
 
     # ------------------------------------------------------------------
-    # Step 1: SAM3 segmentation
+    # Step 1: 3D Model Generation (ComfyUI + Hunyuan3D v2)
     # ------------------------------------------------------------------
 
-    def step1_segment(
+    def step1_generate_3d(
         self,
-        image_path: str,
-        text_prompt: str,
-        confidence: float = 0.4,
-    ) -> dict:
-        """Segment an object from a single image using SAM3 text prompt."""
-        print(f"\n[1/4] SAM3 Segmentation: '{text_prompt}'")
-
-        filename = Path(image_path).name
-        # Upload if it's not already in ComfyUI input
-        if not image_path.startswith("/root/ComfyUI"):
-            print(f"  Uploading {filename}...")
-            filename = self.comfy.upload_image(image_path)
-
-        workflow = build_sam3_segmentation(filename, text_prompt, confidence)
-        outputs = self.comfy.run_workflow(workflow, timeout=300)
-
-        # Extract visualization path
-        viz_path = self.comfy.get_output_path(outputs, "40", "images")
-        print(f"  Segmentation viz: {viz_path}")
-
-        return {"outputs": outputs, "viz": viz_path, "input_image": filename}
-
-    def step1_segment_video(
-        self,
-        video_path: str,
-        text_prompt: str,
-        confidence: float = 0.4,
-        max_frames: int = 30,
-        every_nth: int = 5,
-    ) -> dict:
-        """Segment an object across video frames."""
-        print(f"\n[1/4] SAM3 Video Segmentation: '{text_prompt}'")
-
-        filename = Path(video_path).name
-        workflow = build_sam3_video_segmentation(
-            filename, text_prompt, confidence, max_frames, every_nth
-        )
-        outputs = self.comfy.run_workflow(workflow, timeout=600)
-
-        viz_path = self.comfy.get_output_path(outputs, "40", "images")
-        print(f"  Video segmentation viz: {viz_path}")
-
-        return {"outputs": outputs, "viz": viz_path}
-
-    # ------------------------------------------------------------------
-    # Step 2: SAM3D 3D reconstruction
-    # ------------------------------------------------------------------
-
-    def step2_reconstruct(
-        self,
-        image_filename: str,
+        screenshot_path: str,
         seed: int = 42,
-        texture_mode: str = "fast",
-        texture_size: int = 1024,
-    ) -> dict:
-        """Reconstruct 3D mesh from segmented image using SAM3D."""
-        print(f"\n[2/4] SAM3D 3D Reconstruction")
-        print("  Loading SAM3D models (~30s)...")
+        reference_workflow: Optional[str] = None,
+    ) -> StepResult:
+        """Generate a textured 3D GLB from a single screenshot.
 
-        # Free GPU memory from segmentation before loading SAM3D
-        print("  Freeing GPU memory...")
-        self.comfy.free_memory()
-        time.sleep(3)
+        Uses the KeenTools example Hunyuan3D workflow if reference_workflow
+        is provided, otherwise builds the workflow programmatically.
+        """
+        t0 = time.time()
+        print(f"\n{'='*60}")
+        print("  Step 1: 3D Model Generation (Hunyuan3D v2)")
+        print(f"{'='*60}")
 
-        workflow = build_sam3d_reconstruction(
-            image_filename,
-            seed=seed,
-            texture_mode=texture_mode,
-            texture_size=texture_size,
-        )
+        # Upload screenshot to ComfyUI
+        filename = Path(screenshot_path).name
+        if not screenshot_path.startswith("/root/ComfyUI"):
+            print(f"  Uploading {filename}...")
+            filename = self.comfy.upload_image(screenshot_path)
+
+        # Build or load workflow
+        if reference_workflow and Path(reference_workflow).exists():
+            print(f"  Using reference workflow: {reference_workflow}")
+            workflow = load_reference_workflow(reference_workflow)
+            workflow = patch_workflow_image(workflow, filename)
+        else:
+            print("  Building Hunyuan3D v2 workflow...")
+            workflow = build_hunyuan3d_generation(filename, seed=seed)
+
+        # Run workflow
+        print("  Running 3D generation (this may take 2-5 minutes)...")
         outputs = self.comfy.run_workflow(workflow, timeout=600)
 
-        # TextureBake (node 60) outputs glb_filepath as result[0]
-        glb_path = self.comfy.get_output_path(outputs, "60")
+        # Extract GLB paths
+        textured_glb = self.comfy.get_output_path(outputs, "70")
+        untextured_glb = self.comfy.get_output_path(outputs, "24")
+
+        # Use textured if available, fall back to untextured
+        glb_path = textured_glb or untextured_glb
         if not glb_path:
-            # Try Preview3D node (70) which also references the path
-            glb_path = self.comfy.get_output_path(outputs, "70")
-        print(f"  Textured GLB: {glb_path}")
+            # Try all nodes for any GLB output
+            for node_id in outputs:
+                p = self.comfy.get_output_path(outputs, node_id)
+                if p and (p.endswith(".glb") or p.endswith(".gltf")):
+                    glb_path = p
+                    break
 
-        return {
-            "outputs": outputs,
-            "glb_path": glb_path,
-        }
+        # Validate
+        if glb_path:
+            ok, msg = validate_glb(glb_path)
+        else:
+            ok, msg = False, "No GLB output found in workflow results"
+
+        duration = time.time() - t0
+        print(f"  {'OK' if ok else 'FAIL'}: {msg}")
+        print(f"  Duration: {duration:.1f}s")
+
+        return StepResult(
+            ok=ok,
+            message=msg,
+            data={
+                "glb_path": glb_path,
+                "textured_glb": textured_glb,
+                "untextured_glb": untextured_glb,
+            },
+            duration_seconds=duration,
+        )
 
     # ------------------------------------------------------------------
-    # Step 3: GeoTracker
+    # Step 2: Blender Scene Setup
     # ------------------------------------------------------------------
 
-    def step3_track(self, glb_path: str, video_path: str) -> dict:
-        """Import mesh + video into Blender and run GeoTracker."""
-        print(f"\n[3/4] GeoTracker 3D Match-Move")
+    def step2_setup_scene(
+        self,
+        glb_path: str,
+        video_path: str,
+        mesh_name: str = "tracked_object",
+    ) -> StepResult:
+        """Import GLB and video into Blender, configure GeoTracker.
+
+        Critical fixes from tutorial (missing in v1):
+        - Convert rotation mode QUATERNION → XYZ Euler
+        - Clear parent relationships
+        - Delete orphan empties
+        - Rename mesh
+        - Analyze clip
+        """
+        t0 = time.time()
+        print(f"\n{'='*60}")
+        print("  Step 2: Blender Scene Setup")
+        print(f"{'='*60}")
 
         # Free ComfyUI GPU memory before Blender work
         print("  Freeing ComfyUI GPU memory...")
-        self.comfy.free_memory()
+        try:
+            self.comfy.free_memory()
+        except Exception:
+            pass
         time.sleep(2)
 
+        results = {}
+
         with BlenderClient(self.blender_url) as blender:
-            # Reset scene
+            # 2a. Reset scene and create GeoTracker
             print("  Resetting Blender scene...")
-            blender.execute_python(BLENDER_RESET_SCENE)
+            r = blender.execute_python(RESET_AND_CREATE_GEOTRACKER)
+            results["reset"] = r
+            ok, msg = validate_scene_setup(str(r))
+            if not ok:
+                return StepResult(False, msg, results, time.time() - t0)
 
-            # Import GLB mesh
-            print(f"  Importing mesh: {glb_path}")
-            blender.execute_python(BLENDER_IMPORT_GLB.format(glb_path=glb_path))
+            # 2b. Load video footage
+            print(f"  Loading footage: {video_path}")
+            r = blender.execute_python(LOAD_FOOTAGE.format(video_path=video_path))
+            results["footage"] = r
 
-            # Load video clip
-            print(f"  Loading video: {video_path}")
-            blender.execute_python(BLENDER_LOAD_VIDEO_CLIP.format(video_path=video_path))
-
-            # Setup GeoTracker
-            print("  Configuring GeoTracker...")
-            blender.execute_python(BLENDER_SETUP_GEOTRACKER)
-
-            # Start tracking (split into separate calls for event loop)
-            print("  Starting GeoTracker tracking...")
-            blender.execute_python(BLENDER_GT_START_TRACKING, timeout=30)
-
-            # Wait for tracking to complete (check in separate calls)
-            print("  Waiting for tracking to complete...")
-            for i in range(60):
-                time.sleep(10)
-                result = blender.execute_python(BLENDER_GT_CHECK_STATUS, timeout=10)
-                stdout = result.get("stdout", "")
-                if "DONE" in stdout:
-                    print("  Tracking complete!")
-                    break
-                if "IDLE" in stdout:
-                    print("  Tracking finished (idle)")
-                    break
-            else:
-                print("  Tracking timed out, stopping...")
-                blender.execute_python(
-                    "import bpy; bpy.ops.keentools_gt.stop_calculating_btn()",
-                    timeout=10,
-                )
-
-            # Bake and export
-            print("  Baking animation...")
-            blender.execute_python(BLENDER_GT_BAKE_AND_EXIT, timeout=60)
-
-            # Export tracked animation
-            output_path = str(self.output_dir) if self.output_dir else "/tmp/vfx_output"
-            print(f"  Exporting tracked animation...")
-            blender.execute_python(
-                BLENDER_EXPORT_TRACKING.format(output_path=output_path),
-                timeout=120,
+            # 2c. Import and prepare GLB (the critical tutorial fix)
+            print(f"  Importing GLB: {glb_path}")
+            print("    - Converting rotation: QUATERNION → XYZ Euler")
+            print("    - Clearing parent relationships")
+            print("    - Deleting orphan empties")
+            print(f"    - Renaming mesh to '{mesh_name}'")
+            r = blender.execute_python(
+                IMPORT_AND_PREPARE_GLB.format(glb_path=glb_path, mesh_name=mesh_name)
             )
+            results["import"] = r
+            ok, msg = validate_scene_setup(str(r))
+            if not ok:
+                return StepResult(False, f"GLB import failed: {msg}", results, time.time() - t0)
 
-        return {"status": "tracked", "output_dir": output_path}
+            # 2d. Configure GeoTracker
+            print("  Configuring GeoTracker...")
+            r = blender.execute_python(SETUP_GEOTRACKER.format(mesh_name=mesh_name))
+            results["geotracker"] = r
+
+            # 2e. Analyze clip (new in v2 — v1 skipped this)
+            print("  Analyzing clip for optical flow...")
+            r = blender.execute_python(ANALYZE_CLIP, timeout=300)
+            results["analyze"] = r
+
+            # 2f. Validate scene state
+            print("  Validating scene...")
+            r = blender.execute_python(CHECK_SCENE_STATE)
+            results["state"] = r
+
+        duration = time.time() - t0
+        print(f"  Scene setup complete ({duration:.1f}s)")
+
+        return StepResult(
+            ok=True,
+            message=f"Scene ready: {mesh_name} + GeoTracker configured",
+            data=results,
+            duration_seconds=duration,
+        )
 
     # ------------------------------------------------------------------
-    # Step 4: Compositing + Render
+    # Step 3: GeoTracker Tracking
     # ------------------------------------------------------------------
 
-    def step4_composite(self, video_path: str) -> dict:
-        """Set up compositor and render final output."""
-        print(f"\n[4/4] VFX Compositing + Render")
+    def step3_track(
+        self,
+        pin_frames: Optional[list[int]] = None,
+        initial_transform: Optional[dict] = None,
+        timeout: int = 600,
+    ) -> StepResult:
+        """Run GeoTracker tracking with multi-keyframe pins.
+
+        Args:
+            pin_frames: Frame numbers for pin positions. If None, auto-spaces 5 pins.
+            initial_transform: {location: [x,y,z], rotation: [x,y,z], scale: [x,y,z]}
+            timeout: Max seconds for tracking to complete.
+        """
+        t0 = time.time()
+        print(f"\n{'='*60}")
+        print("  Step 3: GeoTracker Tracking")
+        print(f"{'='*60}")
+
+        results = {}
+
+        # Determine initial alignment method
+        use_magic = initial_transform is None
+        loc = initial_transform.get("location", [0, 0, 0]) if initial_transform else [0, 0, 0]
+        rot = initial_transform.get("rotation", [0, 0, 0]) if initial_transform else [0, 0, 0]
+        scale = initial_transform.get("scale", [1, 1, 1]) if initial_transform else [1, 1, 1]
+
+        if pin_frames is None:
+            pin_frames = []  # Will auto-detect in tracking script
+
+        with BlenderClient(self.blender_url) as blender:
+            # 3a. Enter pin mode and align
+            align_method = "magic keyframe" if use_magic else "manual transform"
+            print(f"  Aligning model ({align_method})...")
+            r = blender.execute_python(
+                ENTER_PINMODE_AND_ALIGN.format(
+                    location=list(loc),
+                    rotation=list(rot),
+                    scale=list(scale),
+                    use_magic="True" if use_magic else "False",
+                ),
+                timeout=60,
+            )
+            results["align"] = r
+
+            # 3b. Track and refine
+            print(f"  Tracking (timeout: {timeout}s)...")
+            r = blender.execute_python(
+                TRACK_AND_REFINE.format(
+                    pin_frames_json=json.dumps(pin_frames),
+                    timeout_seconds=timeout,
+                ),
+                timeout=timeout + 120,  # Extra buffer for bake/export
+            )
+            results["tracking"] = r
+
+            # 3c. Validate tracking
+            ok, msg = validate_tracking(str(r))
+            if not ok:
+                print(f"  WARNING: {msg}")
+                # Don't fail — partial tracking may still be usable
+
+            # 3d. Save blend file
+            if self.output_dir:
+                blend_path = str(self.output_dir / "tracked_scene.blend")
+                print(f"  Saving: {blend_path}")
+                blender.execute_python(SAVE_BLEND.format(output_path=blend_path))
+                results["blend_path"] = blend_path
+
+        duration = time.time() - t0
+        print(f"  Tracking complete ({duration:.1f}s)")
+
+        return StepResult(
+            ok=ok,
+            message=msg,
+            data=results,
+            duration_seconds=duration,
+        )
+
+    # ------------------------------------------------------------------
+    # Step 4: Compositing & Render
+    # ------------------------------------------------------------------
+
+    def step4_composite(
+        self,
+        video_path: str,
+        render_engine: str = "BLENDER_EEVEE",
+    ) -> StepResult:
+        """Set up compositor and render tracked mesh over video."""
+        t0 = time.time()
+        print(f"\n{'='*60}")
+        print("  Step 4: Compositing & Render")
+        print(f"{'='*60}")
 
         output_path = str(self.output_dir) if self.output_dir else "/tmp/vfx_output"
+        results = {}
 
         with BlenderClient(self.blender_url) as blender:
-            # Ensure scene has lighting (use_empty=True scenes don't)
-            print("  Ensuring scene lighting...")
-            blender.execute_python(BLENDER_ENSURE_LIGHTING)
-
-            # Setup compositor
-            print("  Setting up compositor nodes...")
-            blender.execute_python(
-                BLENDER_SETUP_COMPOSITOR.format(
-                    video_path=video_path, output_path=output_path
+            # 4a. Setup compositor
+            print(f"  Setting up compositor ({render_engine})...")
+            r = blender.execute_python(
+                SETUP_COMPOSITOR.format(
+                    video_path=video_path,
+                    output_path=output_path,
+                    render_engine=render_engine,
                 )
             )
+            results["compositor"] = r
 
-            # Render
-            print("  Rendering composited animation...")
-            blender.execute_python(BLENDER_RENDER, timeout=3600)
+            # 4b. Render animation
+            print("  Rendering (this may take a while)...")
+            r = blender.execute_python(RENDER_ANIMATION, timeout=3600)
+            results["render"] = r
 
-        print(f"\n  Output: {output_path}/composited_*.png")
-        return {"status": "rendered", "output_path": output_path}
+        # 4c. Validate output
+        ok, msg = validate_composite_output(output_path)
+
+        duration = time.time() - t0
+        print(f"  {'OK' if ok else 'FAIL'}: {msg}")
+        print(f"  Duration: {duration:.1f}s")
+
+        return StepResult(
+            ok=ok,
+            message=msg,
+            data={"output_path": output_path, **results},
+            duration_seconds=duration,
+        )
 
     # ------------------------------------------------------------------
     # Full pipeline
@@ -654,121 +401,185 @@ class VFXPipeline:
     def run(
         self,
         video_path: str,
-        text_prompt: str,
         output_path: str = "/tmp/vfx_output",
-        confidence: float = 0.4,
+        screenshot_path: Optional[str] = None,
+        glb_path: Optional[str] = None,
+        mesh_name: str = "tracked_object",
         seed: int = 42,
-        texture_mode: str = "fast",
+        reference_workflow: Optional[str] = None,
+        pin_frames: Optional[list[int]] = None,
+        initial_transform: Optional[dict] = None,
+        render_engine: str = "BLENDER_EEVEE",
+        tracking_timeout: int = 600,
         skip_to: Optional[int] = None,
-        glb_override: Optional[str] = None,
     ) -> dict:
         """Run the full pipeline end-to-end.
 
         Args:
-            video_path: Path to input video
-            text_prompt: Object to segment (e.g. "the red car")
-            output_path: Directory for outputs
-            confidence: SAM3 detection confidence threshold
-            seed: Random seed for SAM3D
-            texture_mode: "fast" (~5s) or "opt" (~60s)
-            skip_to: Skip to step N (2=SAM3D, 3=GeoTracker, 4=composite)
-            glb_override: Use existing GLB instead of running steps 1-2
+            video_path: Path to input video.
+            output_path: Directory for all outputs.
+            screenshot_path: Screenshot for 3D generation (required if no glb_path).
+            glb_path: Pre-made GLB file (skip step 1).
+            mesh_name: Name for the tracked mesh in Blender.
+            seed: Random seed for Hunyuan3D.
+            reference_workflow: Path to KeenTools example ComfyUI workflow JSON.
+            pin_frames: Frame numbers for GeoTracker pins.
+            initial_transform: Initial model alignment transform.
+            render_engine: "BLENDER_EEVEE" or "CYCLES".
+            tracking_timeout: Max seconds for GeoTracker.
+            skip_to: Skip to step N (2=scene, 3=track, 4=composite).
         """
         out = self._ensure_output_dir(output_path)
         results = {}
+        total_t0 = time.time()
 
+        print("\n" + "=" * 60)
+        print("  VFX Object Tracking Pipeline v2")
+        print(f"  Video:      {video_path}")
+        if screenshot_path:
+            print(f"  Screenshot: {screenshot_path}")
+        if glb_path:
+            print(f"  GLB:        {glb_path}")
+        print(f"  Output:     {output_path}")
+        print(f"  Mesh name:  {mesh_name}")
         print("=" * 60)
-        print("  3D VFX Object Tracking Pipeline")
-        print(f"  Video: {video_path}")
-        print(f"  Prompt: '{text_prompt}'")
-        print(f"  Output: {output_path}")
-        print("=" * 60)
 
-        # Determine the image for SAM3D (first frame or best frame from segmentation)
-        image_for_3d = None
-        glb_path = glb_override
-
-        if not skip_to or skip_to <= 1:
-            # Step 1: Segment the first frame to find the object
-            # For now, use first frame extraction via a simple workflow
-            seg_result = self.step1_segment(
-                video_path, text_prompt, confidence
-            )
-            results["step1"] = seg_result
-            # The segmentation visualization shows what was detected
-            image_for_3d = seg_result["input_image"]
-
-        if not glb_path and (not skip_to or skip_to <= 2):
-            # Step 2: 3D reconstruct from the segmented frame
-            if not image_for_3d:
-                raise ValueError("No image for 3D reconstruction. Run step 1 first.")
-            recon_result = self.step2_reconstruct(
-                image_for_3d, seed=seed, texture_mode=texture_mode
-            )
-            results["step2"] = recon_result
-            glb_path = recon_result.get("glb_path")
+        # Step 1: Generate 3D model (or use provided GLB)
+        if not glb_path and (not skip_to or skip_to <= 1):
+            if not screenshot_path:
+                raise ValueError("Either --screenshot or --glb is required")
+            result = self.step1_generate_3d(screenshot_path, seed, reference_workflow)
+            results["step1"] = result
+            if not result.ok:
+                raise RuntimeError(f"Step 1 failed: {result.message}")
+            glb_path = result.data.get("glb_path")
 
         if not glb_path:
-            raise ValueError("No GLB mesh available. Run steps 1-2 or provide --glb-override.")
+            raise ValueError("No GLB available. Provide --screenshot or --glb.")
 
+        # Validate GLB before proceeding
+        ok, msg = validate_glb(glb_path)
+        if not ok:
+            raise ValueError(f"Invalid GLB: {msg}")
+        print(f"\n  GLB validated: {msg}")
+
+        # Step 2: Scene setup
+        if not skip_to or skip_to <= 2:
+            result = self.step2_setup_scene(glb_path, video_path, mesh_name)
+            results["step2"] = result
+            if not result.ok:
+                raise RuntimeError(f"Step 2 failed: {result.message}")
+
+        # Step 3: Tracking
         if not skip_to or skip_to <= 3:
-            # Step 3: GeoTracker
-            track_result = self.step3_track(glb_path, video_path)
-            results["step3"] = track_result
+            result = self.step3_track(pin_frames, initial_transform, tracking_timeout)
+            results["step3"] = result
+            # Don't fail on partial tracking — compositor can still render
 
+        # Step 4: Compositing
         if not skip_to or skip_to <= 4:
-            # Step 4: Composite + Render
-            comp_result = self.step4_composite(video_path)
-            results["step4"] = comp_result
+            result = self.step4_composite(video_path, render_engine)
+            results["step4"] = result
+
+        total_duration = time.time() - total_t0
 
         print("\n" + "=" * 60)
         print("  Pipeline complete!")
-        print(f"  Output directory: {output_path}")
+        print(f"  Total duration: {total_duration:.1f}s")
+        print(f"  Output: {output_path}")
         print("=" * 60)
 
-        # Save pipeline metadata
+        # Save metadata
+        meta = {
+            "video": video_path,
+            "screenshot": screenshot_path,
+            "glb": glb_path,
+            "mesh_name": mesh_name,
+            "seed": seed,
+            "render_engine": render_engine,
+            "total_duration_seconds": total_duration,
+            "steps": {
+                name: {"ok": r.ok, "message": r.message, "duration": r.duration_seconds}
+                for name, r in results.items()
+            },
+        }
         meta_path = out / "pipeline_metadata.json"
         with open(meta_path, "w") as f:
-            json.dump(
-                {
-                    "video": video_path,
-                    "text_prompt": text_prompt,
-                    "seed": seed,
-                    "glb_path": glb_path,
-                    "steps_completed": list(results.keys()),
-                },
-                f,
-                indent=2,
-            )
+            json.dump(meta, f, indent=2)
+        print(f"  Metadata: {meta_path}")
 
         return results
 
 
 def main():
-    parser = argparse.ArgumentParser(description="3D VFX Object Tracking Pipeline")
-    parser.add_argument("--video", required=True, help="Path to input video")
-    parser.add_argument("--prompt", required=True, help="Text prompt for object segmentation")
+    parser = argparse.ArgumentParser(
+        description="VFX Object Tracking Pipeline v2",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Generate 3D from screenshot + track:
+  %(prog)s --video footage.mp4 --screenshot car.png --output /tmp/vfx
+
+  # Use pre-made GLB (skip 3D generation):
+  %(prog)s --video footage.mp4 --glb model.glb --output /tmp/vfx
+
+  # KeenTools example files:
+  %(prog)s --video assets/keentools-example/.../5835604-hd_1920_1080_25fps.mp4 \\
+           --glb assets/keentools-example/.../Car.glb --output /tmp/vfx_test
+        """,
+    )
+    parser.add_argument("--video", required=True, help="Input video path")
+    parser.add_argument("--screenshot", help="Screenshot for 3D generation")
+    parser.add_argument("--glb", help="Pre-made GLB model (skip step 1)")
     parser.add_argument("--output", default="/tmp/vfx_output", help="Output directory")
-    parser.add_argument("--confidence", type=float, default=0.4, help="SAM3 confidence threshold")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed for SAM3D")
-    parser.add_argument("--texture-mode", choices=["fast", "opt"], default="fast")
+    parser.add_argument("--name", default="tracked_object", help="Mesh name in Blender")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--reference-workflow", help="KeenTools example workflow JSON path")
+    parser.add_argument(
+        "--pin-frames",
+        help="Comma-separated frame numbers for GeoTracker pins (e.g., 1,50,100)",
+    )
+    parser.add_argument(
+        "--initial-transform",
+        help='JSON transform: \'{"location":[0,0,0],"rotation":[0,0,0],"scale":[1,1,1]}\'',
+    )
+    parser.add_argument(
+        "--render-engine",
+        choices=["BLENDER_EEVEE", "CYCLES"],
+        default="BLENDER_EEVEE",
+        help="Blender render engine",
+    )
+    parser.add_argument("--timeout", type=int, default=600, help="Tracking timeout (seconds)")
     parser.add_argument("--skip-to", type=int, choices=[1, 2, 3, 4], help="Skip to step N")
-    parser.add_argument("--glb-override", help="Use existing GLB mesh (skip steps 1-2)")
     parser.add_argument("--comfyui-url", default="http://comfyui:8188")
     parser.add_argument("--blender-url", default="ws://127.0.0.1:8765")
 
     args = parser.parse_args()
 
+    # Parse pin frames
+    pin_frames = None
+    if args.pin_frames:
+        pin_frames = [int(f.strip()) for f in args.pin_frames.split(",")]
+
+    # Parse initial transform
+    initial_transform = None
+    if args.initial_transform:
+        initial_transform = json.loads(args.initial_transform)
+
     pipeline = VFXPipeline(args.comfyui_url, args.blender_url)
     pipeline.run(
         video_path=args.video,
-        text_prompt=args.prompt,
         output_path=args.output,
-        confidence=args.confidence,
+        screenshot_path=args.screenshot,
+        glb_path=args.glb,
+        mesh_name=args.name,
         seed=args.seed,
-        texture_mode=args.texture_mode,
+        reference_workflow=args.reference_workflow,
+        pin_frames=pin_frames,
+        initial_transform=initial_transform,
+        render_engine=args.render_engine,
+        tracking_timeout=args.timeout,
         skip_to=args.skip_to,
-        glb_override=args.glb_override,
     )
 
 

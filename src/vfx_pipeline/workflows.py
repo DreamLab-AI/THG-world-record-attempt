@@ -1,235 +1,279 @@
-"""ComfyUI workflow builders for each pipeline stage."""
+"""ComfyUI workflow builders for VFX pipeline v2.
 
-from typing import Optional
+v2 uses Hunyuan3D v2 for 3D generation (replacing the non-existent v1 nodes).
+The canonical workflow is the KeenTools example `3dmodelgeneration.json`.
+"""
+
+import json
+from pathlib import Path
 
 
-def build_sam3_segmentation(
-    image_filename: str,
-    text_prompt: str,
-    confidence: float = 0.3,
-) -> dict:
-    """Build GroundingDINO + SAM2 text-prompted segmentation workflow.
+def load_reference_workflow(workflow_path: str) -> dict:
+    """Load a ComfyUI workflow JSON file and return as dict.
 
-    Loads image → GroundingDINO detector → SAM2 segmenter → outputs masks + viz.
+    This is the preferred method — use the KeenTools example workflow
+    directly rather than building workflows programmatically.
     """
-    return {
-        "10": {
-            "inputs": {"image": image_filename, "upload": "image"},
-            "class_type": "LoadImage",
-            "_meta": {"title": "Load Input Frame"},
-        },
-        "20": {
-            "inputs": {
-                "model_name": "GroundingDINO_SwinT_OGC (694MB)",
-            },
-            "class_type": "GroundingDinoModelLoader (segment anything2)",
-            "_meta": {"title": "Load GroundingDINO Model"},
-        },
-        "25": {
-            "inputs": {
-                "model_name": "sam2_hiera_tiny",
-            },
-            "class_type": "SAM2ModelLoader (segment anything2)",
-            "_meta": {"title": "Load SAM2 Model"},
-        },
-        "30": {
-            "inputs": {
-                "sam_model": ["25", 0],
-                "grounding_dino_model": ["20", 0],
-                "image": ["10", 0],
-                "prompt": text_prompt,
-                "threshold": confidence,
-                "keep_model_loaded": False,
-            },
-            "class_type": "GroundingDinoSAM2Segment (segment anything2)",
-            "_meta": {"title": "GroundingDINO + SAM2 Segmentation"},
-        },
-        # Save visualization (output 0 = IMAGE, output 1 = MASK)
-        "40": {
-            "inputs": {
-                "filename_prefix": "seg_viz",
-                "images": ["30", 0],
-            },
-            "class_type": "SaveImage",
-            "_meta": {"title": "Save Visualization"},
-        },
-        # Preview masks
-        "50": {
-            "inputs": {"images": ["30", 0]},
-            "class_type": "PreviewImage",
-            "_meta": {"title": "Preview Segmentation"},
-        },
-    }
+    with open(workflow_path, "r") as f:
+        return json.load(f)
 
 
-def build_sam3_video_segmentation(
-    video_filename: str,
-    text_prompt: str,
-    confidence: float = 0.3,
-    frame_load_cap: int = 30,
-    select_every_nth: int = 5,
-) -> dict:
-    """Build GroundingDINO + SAM2 video segmentation workflow.
+def patch_workflow_image(workflow: dict, image_filename: str) -> dict:
+    """Patch a loaded workflow to use a specific input image.
 
-    Loads video → extracts frames → GroundingDINO + SAM2 segmentation → saves masks.
+    Finds the LoadImage node and sets its image filename.
+    Works with both UI format (nodes list) and API format (node_id dict).
     """
-    return {
-        "10": {
-            "inputs": {
-                "video": video_filename,
-                "force_rate": 0,
-                "custom_width": 0,
-                "custom_height": 0,
-                "frame_load_cap": frame_load_cap,
-                "skip_first_frames": 0,
-                "select_every_nth": select_every_nth,
-            },
-            "class_type": "VHS_LoadVideo",
-            "_meta": {"title": "Load Video"},
-        },
-        "20": {
-            "inputs": {
-                "model_name": "GroundingDINO_SwinT_OGC (694MB)",
-            },
-            "class_type": "GroundingDinoModelLoader (segment anything2)",
-            "_meta": {"title": "Load GroundingDINO Model"},
-        },
-        "25": {
-            "inputs": {
-                "model_name": "sam2_hiera_tiny",
-            },
-            "class_type": "SAM2ModelLoader (segment anything2)",
-            "_meta": {"title": "Load SAM2 Model"},
-        },
-        "30": {
-            "inputs": {
-                "sam_model": ["25", 0],
-                "grounding_dino_model": ["20", 0],
-                "image": ["10", 0],
-                "prompt": text_prompt,
-                "threshold": confidence,
-                "keep_model_loaded": False,
-            },
-            "class_type": "GroundingDinoSAM2Segment (segment anything2)",
-            "_meta": {"title": "GroundingDINO + SAM2 Segmentation"},
-        },
-        # Save visualization
-        "40": {
-            "inputs": {
-                "filename_prefix": "seg_video_viz",
-                "images": ["30", 0],
-            },
-            "class_type": "SaveImage",
-            "_meta": {"title": "Save Segmentation Viz"},
-        },
-    }
+    if "last_node_id" in workflow:
+        # UI format — find LoadImage in nodes list
+        for node in workflow.get("nodes", []):
+            if node.get("type") == "LoadImage":
+                if "widgets_values" in node and len(node["widgets_values"]) > 0:
+                    node["widgets_values"][0] = image_filename
+                    break
+    else:
+        # API format
+        for node_id, node_data in workflow.items():
+            if isinstance(node_data, dict) and node_data.get("class_type") == "LoadImage":
+                node_data.setdefault("inputs", {})["image"] = image_filename
+                break
+
+    return workflow
 
 
-def build_sam3d_reconstruction(
+def build_hunyuan3d_generation(
     image_filename: str,
     seed: int = 42,
-    stage1_steps: int = 25,
-    stage2_steps: int = 25,
-    texture_mode: str = "fast",
-    texture_size: int = 1024,
-    simplify: float = 0.95,
+    mesh_steps: int = 50,
+    texture_steps: int = 50,
+    resolution: int = 512,
+    export_format: str = "glb",
 ) -> dict:
-    """Build SAM3D single-image to 3D mesh reconstruction workflow.
+    """Build a Hunyuan3D v2 mesh + texture generation workflow.
 
-    LoadSAM3DModel outputs: 0=depth_model, 1=generator, 2=slat_decoder_gs, 3=slat_decoder_mesh
-    DepthEstimate outputs: 0=intrinsics, 1=pointmap_path, 2=pointcloud_ply, 3=depth_mask
-    GenerateSLAT outputs: 0=slat_path, 1=debug_preprocessed
-    MeshDecode outputs: 0=glb_filepath
-    GaussianDecode outputs: 0=ply_filepath
-    TextureBake outputs: 0=glb_filepath (textured)
+    This is a programmatic approximation of the KeenTools example
+    3dmodelgeneration.json workflow. The reference workflow is preferred
+    when available (use load_reference_workflow + patch_workflow_image).
+
+    Pipeline:
+        LoadImage → Resize → RemoveBackground → Delight
+        → Hy3DModelLoader → GenerateMesh → VAEDecode → PostprocessMesh
+        → MeshUVWrap → RenderMultiView
+        → SampleMultiView → Upscale → BakeFromMultiview
+        → VerticeInpaintTexture → CV2InpaintTexture → ApplyTexture
+        → ExportMesh (textured GLB)
+        PostprocessMesh → ExportMesh (untextured GLB)
     """
     return {
+        # Load and resize image
         "10": {
-            "inputs": {"image": image_filename, "upload": "image"},
             "class_type": "LoadImage",
-            "_meta": {"title": "Load Image"},
+            "inputs": {"image": image_filename},
         },
-        "15": {
+        "11": {
+            "class_type": "ImageResize+",
             "inputs": {
-                "target_width": 1024,
-                "target_height": 1024,
-                "padding_color": "white",
-                "interpolation": "area",
                 "image": ["10", 0],
+                "width": resolution,
+                "height": resolution,
+                "interpolation": "lanczos",
+                "method": "pad",
+                "condition": "always",
+                "multiple_of": 2,
             },
-            "class_type": "ResizeAndPadImage",
-            "_meta": {"title": "Resize Image"},
         },
+        # Remove background
+        "12": {
+            "class_type": "TransparentBGSession+",
+            "inputs": {"model": "base", "keep_alpha": True},
+        },
+        "13": {
+            "class_type": "ImageRemoveBackground+",
+            "inputs": {
+                "rembg_session": ["12", 0],
+                "image": ["11", 0],
+            },
+        },
+        # Mesh generation (Hunyuan3D v2 DIT)
         "20": {
+            "class_type": "Hy3DModelLoader",
             "inputs": {
+                "model": "hy3dgen/hunyuan3d-dit-v2-0-fp16.safetensors",
+                "attention": "sdpa",
                 "compile": False,
-                "use_gpu_cache": True,
             },
-            "class_type": "LoadSAM3DModel",
-            "_meta": {"title": "Load SAM3D Model"},
         },
-        "30": {
+        "21": {
+            "class_type": "Hy3DGenerateMesh",
             "inputs": {
-                "depth_model": ["20", 0],
-                "image": ["15", 0],
-            },
-            "class_type": "SAM3D_DepthEstimate",
-            "_meta": {"title": "Depth Estimate"},
-        },
-        # Generate SLAT (sparse + latent)
-        "40": {
-            "inputs": {
-                "generator": ["20", 1],
-                "image": ["15", 0],
-                "mask": ["30", 3],
-                "pointmap_path": ["30", 1],
+                "pipeline": ["20", 0],
+                "image": ["11", 0],
+                "mask": ["13", 1],
+                "guidance_scale": 5.5,
+                "steps": mesh_steps,
                 "seed": seed,
-                "stage1_steps": stage1_steps,
-                "stage1_cfg": 7.0,
-                "stage2_steps": stage2_steps,
-                "stage2_cfg": 5.0,
-                "use_distillation": True,
+                "seed_mode": "fixed",
             },
-            "class_type": "SAM3DGenerateSLAT",
-            "_meta": {"title": "Generate SLAT"},
         },
-        # Mesh decode
+        "22": {
+            "class_type": "Hy3DVAEDecode",
+            "inputs": {
+                "vae": ["20", 1],
+                "latents": ["21", 0],
+                "octree_resolution": 512,
+                "num_chunks": 8000,
+                "mc_level": 0,
+                "mc_algo": "mc",
+            },
+        },
+        "23": {
+            "class_type": "Hy3DPostprocessMesh",
+            "inputs": {
+                "trimesh": ["22", 0],
+                "simplify": True,
+                "fill_holes": True,
+                "remove_degenerate": True,
+                "target_face_count": 25000,
+                "apply_transform": False,
+            },
+        },
+        # Export untextured mesh
+        "24": {
+            "class_type": "Hy3DExportMesh",
+            "inputs": {
+                "trimesh": ["23", 0],
+                "filename_prefix": "3D/Hy3D",
+                "file_format": export_format,
+                "save_metadata": True,
+            },
+        },
+        # Delight image for texture
+        "30": {
+            "class_type": "DownloadAndLoadHy3DDelightModel",
+            "inputs": {"model": "hunyuan3d-delight-v2-0"},
+        },
+        "31": {
+            "class_type": "SolidMask",
+            "inputs": {"value": 0.5, "width": resolution, "height": resolution},
+        },
+        "32": {
+            "class_type": "MaskToImage",
+            "inputs": {"mask": ["31", 0]},
+        },
+        "33": {
+            "class_type": "ImageCompositeMasked",
+            "inputs": {
+                "destination": ["32", 0],
+                "source": ["11", 0],
+                "mask": ["13", 1],
+                "x": 0,
+                "y": 0,
+                "resize_source": False,
+            },
+        },
+        "34": {
+            "class_type": "Hy3DDelightImage",
+            "inputs": {
+                "delight_pipe": ["30", 0],
+                "image": ["33", 0],
+                "steps": texture_steps,
+                "width": resolution,
+                "height": resolution,
+                "guidance_scale": 1.5,
+                "num_images_per_prompt": 1,
+                "seed": seed,
+            },
+        },
+        # UV wrap and render multiview
+        "40": {
+            "class_type": "Hy3DMeshUVWrap",
+            "inputs": {"trimesh": ["23", 0]},
+        },
+        "41": {
+            "class_type": "Hy3DRenderMultiView",
+            "inputs": {
+                "trimesh": ["40", 0],
+                "width": resolution,
+                "height": resolution,
+                "mode": "world",
+            },
+        },
+        # Paint model texture from multiview
         "50": {
-            "inputs": {
-                "slat_decoder_mesh": ["20", 3],
-                "slat": ["40", 0],
-                "with_postprocess": True,
-                "simplify": simplify,
-            },
-            "class_type": "SAM3DMeshDecode",
-            "_meta": {"title": "Mesh Decode"},
+            "class_type": "DownloadAndLoadHy3DPaintModel",
+            "inputs": {"model": "hunyuan3d-paint-v2-0"},
         },
-        # Gaussian decode
-        "55": {
+        "51": {
+            "class_type": "Hy3DSampleMultiView",
             "inputs": {
-                "slat_decoder_gs": ["20", 2],
-                "slat": ["40", 0],
+                "pipeline": ["50", 0],
+                "ref_image": ["34", 0],
+                "normal_maps": ["41", 0],
+                "position_maps": ["41", 1],
+                "seed": seed,
+                "steps": texture_steps,
+                "width": 1024,
+                "seed_mode": "fixed",
+                "num_images_per_prompt": 1,
             },
-            "class_type": "SAM3DGaussianDecode",
-            "_meta": {"title": "Gaussian Decode"},
         },
-        # Texture bake
+        # Upscale multiview for texture detail
+        "52": {
+            "class_type": "UpscaleModelLoader",
+            "inputs": {"model_name": "4x_foolhardy_Remacri.pth"},
+        },
+        "53": {
+            "class_type": "ImageUpscaleWithModel",
+            "inputs": {
+                "upscale_model": ["52", 0],
+                "image": ["51", 0],
+            },
+        },
+        # Bake texture onto mesh
         "60": {
+            "class_type": "Hy3DBakeFromMultiview",
             "inputs": {
-                "glb_path": ["50", 0],
-                "ply_path": ["55", 0],
-                "texture_mode": texture_mode,
-                "texture_size": texture_size,
+                "images": ["53", 0],
+                "renderer": ["41", 2],
             },
-            "class_type": "SAM3DTextureBake",
-            "_meta": {"title": "Texture Bake"},
         },
-        # Preview 3D (output node)
-        "70": {
+        "61": {
+            "class_type": "Hy3DMeshVerticeInpaintTexture",
             "inputs": {
-                "model_file": ["60", 0],
+                "texture": ["60", 0],
+                "mask": ["60", 1],
+                "renderer": ["60", 2],
             },
+        },
+        "62": {
+            "class_type": "CV2InpaintTexture",
+            "inputs": {
+                "texture": ["61", 0],
+                "mask": ["61", 1],
+                "inpaint_radius": 3,
+                "method": "ns",
+            },
+        },
+        "63": {
+            "class_type": "Hy3DApplyTexture",
+            "inputs": {
+                "texture": ["62", 0],
+                "renderer": ["61", 2],
+            },
+        },
+        # Export textured mesh
+        "70": {
+            "class_type": "Hy3DExportMesh",
+            "inputs": {
+                "trimesh": ["63", 0],
+                "filename_prefix": "3D/Hy3D_Textured",
+                "file_format": export_format,
+                "save_metadata": True,
+            },
+        },
+        # Preview 3D
+        "80": {
             "class_type": "Preview3D",
-            "_meta": {"title": "Preview 3D"},
+            "inputs": {"model_file": ["70", 0]},
         },
     }

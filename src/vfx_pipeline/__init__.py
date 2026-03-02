@@ -1,6 +1,6 @@
-"""3D VFX Object Tracking Pipeline.
+"""VFX Object Tracking Pipeline v2.
 
-SAM3 → SAM3D → GeoTracker → Compositing
+Hunyuan3D → GeoTracker → Compositing
 """
 
-__version__ = "0.1.0"
+__version__ = "2.0.0"
