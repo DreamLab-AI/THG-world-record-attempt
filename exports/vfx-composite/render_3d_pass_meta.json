@@ -1,5 +1,6 @@
 {
   "type": "3d_pass_render",
+  "material": "camera_projected_texture_with_procedural_fallback",
   "frames_rendered": 314,
   "total_frames": 314,
   "resolution": [
