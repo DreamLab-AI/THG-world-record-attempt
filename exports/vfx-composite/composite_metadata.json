@@ -1,0 +1,42 @@
+{
+  "type": "vfx_composite_final",
+  "pipeline": "GeoTracker + Blender EEVEE + ffmpeg overlay",
+  "source_video": "assets/keentools-example/ComfyUI+GeoTracker_example/5835604-hd_1920_1080_25fps.mp4",
+  "source_blend": "assets/keentools-example/ComfyUI+GeoTracker_example/CameraTrack.blend",
+  "source_glb": "assets/keentools-example/ComfyUI+GeoTracker_example/Car.glb",
+  "output_video": "exports/vfx-composite/tracked_car_composite.mp4",
+  "render_method": "two_pass",
+  "pass_1": {
+    "description": "3D render with film_transparent (RGBA PNGs)",
+    "script": "scripts/render_3d_pass.py",
+    "engine": "BLENDER_EEVEE",
+    "samples": 64,
+    "frames": 314,
+    "material": "metallic teal (opaque)",
+    "lights": ["KeyLight (sun 4.0)", "FillLight (area 200)"]
+  },
+  "pass_2": {
+    "description": "ffmpeg alpha overlay of 3D pass on original video",
+    "filter": "overlay=0:0:format=auto",
+    "codec": "libx264",
+    "crf": 18,
+    "preset": "medium"
+  },
+  "tracking": {
+    "tool": "KeenTools GeoTracker",
+    "car_action": "GTAct",
+    "camera_action": "CameraAction",
+    "car_vertices": 17250,
+    "car_faces": 19800
+  },
+  "output": {
+    "resolution": [1920, 1080],
+    "fps": 25,
+    "frames": 314,
+    "duration_sec": 12.56,
+    "codec": "H.264 High",
+    "file_size_mb": 17.5
+  },
+  "blender_version": "5.0.1",
+  "date": "2026-03-02"
+}

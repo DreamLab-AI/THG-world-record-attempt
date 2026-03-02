@@ -1,0 +1,16 @@
+{
+  "type": "3d_pass_render",
+  "frames_rendered": 314,
+  "total_frames": 314,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 25,
+  "render_engine": "BLENDER_EEVEE",
+  "film_transparent": true,
+  "compositor": false,
+  "car_verts": 17250,
+  "car_animated": true,
+  "camera_animated": true
+}

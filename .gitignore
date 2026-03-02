@@ -1,0 +1,20 @@
+# Intermediate render frames (too large for git)
+exports/vfx-composite/render_*.png
+exports/vfx-composite/frame_*.png
+exports/vfx-composite/validate_*.png
+
+# Swarm state
+.swarm/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
