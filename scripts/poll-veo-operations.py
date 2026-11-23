@@ -2,7 +2,9 @@
 """Poll Veo operations and download completed videos."""
 import json, urllib.request, time, base64, os, sys
 
-API_KEY = "AIzaSyBGC0OnF9bGOcAgtebKHf79TBJQhpHWTKY"
+API_KEY = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_GEMINI_API_KEY")
+if not API_KEY:
+    sys.exit("GOOGLE_API_KEY (or GOOGLE_GEMINI_API_KEY) is not set; export it before running this script.")
 OUTPUT_DIR = "assets/animated"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
